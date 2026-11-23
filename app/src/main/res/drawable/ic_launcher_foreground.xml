@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- 溫暖琥珀金圓形錢幣/蜜罐圖示 -->
+    <path
+        android:fillColor="#EE9B27"
+        android:pathData="M54,26A28,28 0 1,1 54,82A28,28 0 1,1 54,26Z" />
+    <path
+        android:fillColor="#FFFDF8"
+        android:pathData="M52,38h4v4h6v4h-12v4h10c2.2,0 4,1.8 4,4v6c0,2.2 -1.8,4 -4,4h-4v4h-4v-4h-6v-4h12v-4h-10c-2.2,0 -4,-1.8 -4,-4v-6c0,-2.2 1.8,-4 4,-4h4v-4z" />
+</vector>

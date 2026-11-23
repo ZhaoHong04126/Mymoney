@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg_screen">#FAF5EC</color>
+    <color name="bg_card">#FFFDF8</color>
+    <color name="bg_input">#F6F0E4</color>
+    <color name="amber_primary">#EE9B27</color>
+    <color name="amber_dark">#D68111</color>
+    <color name="amber_light">#FCE8C3</color>
+    <color name="expense_color">#DF6A4E</color>
+    <color name="expense_bg">#FCECE8</color>
+    <color name="income_color">#46937E</color>
+    <color name="income_bg">#E5F4EF</color>
+    <color name="transfer_color">#8E6E53</color>
+    <color name="transfer_bg">#F2EBE3</color>
+    <color name="text_main">#3D3127</color>
+    <color name="text_secondary">#7B6B5D</color>
+    <color name="text_muted">#A69688</color>
+    <color name="border_warm">#EAE0D1</color>
+</resources>
