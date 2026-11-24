@@ -6,7 +6,6 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.Gravity
-import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.widget.LinearLayout
@@ -22,7 +21,6 @@ import kotlin.math.max
 import kotlin.math.roundToLong
 
 object UiColors {
-    val BG_PAGE = "#EFE8DC".toColorInt()
     val BG_SCREEN = "#FAF5EC".toColorInt()
     val BG_CARD = "#FFFDF8".toColorInt()
     val BG_INPUT = "#F6F0E4".toColorInt()

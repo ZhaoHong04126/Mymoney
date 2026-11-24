@@ -106,10 +106,10 @@ class DonutChartView @JvmOverloads constructor(
                 if (angle < 0f) angle += 360f
 
                 var accAngle = 0f
-                for (slice in slices) {
-                    val sweep = (slice.amount.toFloat() / totalAmount.toFloat()) * 360f
+                for ((categoryId, amount) in slices) {
+                    val sweep = (amount.toFloat() / totalAmount.toFloat()) * 360f
                     if (angle >= accAngle && angle <= accAngle + sweep) {
-                        onSliceClickListener?.invoke(slice.categoryId)
+                        onSliceClickListener?.invoke(categoryId)
                         performClick()
                         return true
                     }
