@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">暖暖記帳</string>
+    <string name="app_name">生活記帳本</string>
     <string name="net_worth_title">淨資產總額 (NT$)</string>
     <string name="zero_currency">$0</string>
     <string name="month_label_format">%1$d年 %2$d月</string>

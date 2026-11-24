@@ -333,7 +333,7 @@ class MainActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             setPadding(dp(9), 0, dp(6), 0)
             addView(TextView(this@MainActivity).apply {
-                text = "暖暖記帳"
+                text = "快樂記帳本"
                 textSize = 17f
                 setTypeface(null, Typeface.BOLD)
                 setTextColor(UiColors.TEXT_MAIN)
@@ -1170,7 +1170,7 @@ class MainActivity : AppCompatActivity() {
                 context = this@MainActivity,
                 onExportClick = {
                     pendingExportCsv = repo.exportToCsv()
-                    exportCsvLauncher.launch("暖暖記帳_備份資料_${currentYmString()}.csv")
+                    exportCsvLauncher.launch("快樂記帳本_備份資料_${currentYmString()}.csv")
                 },
                 onImportClick = {
                     importFileLauncher.launch(

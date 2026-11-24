@@ -110,19 +110,16 @@ object AppDefaults {
         Category("exp_drink", "飲料咖啡", "☕"),
         Category("exp_transport", "交通通勤", "🚌"),
         Category("exp_shopping", "生活購物", "🛍️"),
-        Category("exp_grocery", "超市買菜", "🥬"),
         Category("exp_fun", "休閒娛樂", "🎬"),
         Category("exp_home", "居家房租", "🏠"),
         Category("exp_bills", "水電通訊", "💡"),
-        Category("exp_medical", "醫療保健", "💊"),
         Category("exp_other", "其他支出", "✨")
     )
 
     fun defaultIncomeCategories(): MutableList<Category> = mutableListOf(
         Category("inc_salary", "薪資收入", "💰"),
-        Category("inc_bonus", "獎金回饋", "🧧"),
         Category("inc_invest", "投資理財", "📈"),
-        Category("inc_part_time", "兼職接案", "💻"),
+        Category("inc_bonus", "獎金", "🧧"),
         Category("inc_other", "其他收入", "🌟")
     )
 
@@ -136,7 +133,7 @@ object AppDefaults {
             unlockedMonths = mutableListOf(),
             accounts = mutableListOf(
                 Account("acc_cash", "隨身現金", AccountType.CASH, "💵", 0L),
-                Account("acc_bank", "台新薪轉戶", AccountType.BANK, "🏦", 0L),
+                Account("acc_bank", "郵局帳戶", AccountType.BANK, "🏦", 0L),
                 Account("acc_digital_pay", "LINE Pay", AccountType.DIGITAL_PAY, "📱", 0L),
                 Account("acc_credit", "日常信用卡", AccountType.CREDIT, "💳", 0L)
             ),

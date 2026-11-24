@@ -785,7 +785,7 @@ object BottomSheetDialogs {
             setTextColor(UiColors.TEXT_MAIN)
         })
         container.addView(TextView(context).apply {
-            text = "當支出接近或超過預算時，暖暖記帳會溫柔提醒您"
+            text = "當支出接近或超過預算時，系統會溫柔提醒您"
             textSize = 12f
             setTextColor(UiColors.TEXT_SECONDARY)
         }, LinearLayout.LayoutParams(
