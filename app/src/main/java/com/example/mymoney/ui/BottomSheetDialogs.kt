@@ -196,7 +196,7 @@ object BottomSheetDialogs {
             setPadding(context.dp(6), context.dp(4), context.dp(6), context.dp(4))
             setOnClickListener { dialog.dismiss() }
         }
-        val segGroup = LinearLayout(context).apply {
+        val segmentGroup = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             background = createRoundedRect(context, UiColors.BG_INPUT, 99f)
             setPadding(context.dp(3), context.dp(3), context.dp(3), context.dp(3))
@@ -208,12 +208,12 @@ object BottomSheetDialogs {
             visibility = if (editingTx != null) View.VISIBLE else View.INVISIBLE
         }
 
-        val segWrap = LinearLayout(context).apply {
+        val segmentWrap = LinearLayout(context).apply {
             gravity = Gravity.CENTER
-            addView(segGroup)
+            addView(segmentGroup)
         }
         header.addView(closeBtn)
-        header.addView(segWrap, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        header.addView(segmentWrap, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         header.addView(deleteBtn)
         container.addView(header, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
@@ -301,8 +301,8 @@ object BottomSheetDialogs {
         // 轉帳帳戶選擇區
         val accLabels = accounts.map { "${it.icon} ${it.name}" }
         val fromIdxInit = accounts.indexOfFirst { it.id == editingTx?.accountId }.coerceAtLeast(0)
-        val toIdxInit = editingTx?.toAccountId?.let { tid ->
-            accounts.indexOfFirst { it.id == tid }.takeIf { it >= 0 }
+        val toIdxInit = editingTx?.toAccountId?.let { targetId ->
+            accounts.indexOfFirst { it.id == targetId }.takeIf { it >= 0 }
         } ?: if (accounts.size > 1) 1 else 0
 
         val fromSpinner = makeWarmSpinner(context, accLabels, fromIdxInit)
@@ -513,10 +513,10 @@ object BottomSheetDialogs {
         }
 
         // 建立 支出 / 收入 / 轉帳 切換按鈕
-        val segButtons = mutableMapOf<TxType, TextView>()
+        val segmentButtons = mutableMapOf<TxType, TextView>()
         fun refreshSegmentedButtons() {
             TxType.entries.forEach { type ->
-                val btn = segButtons[type] ?: return@forEach
+                val btn = segmentButtons[type] ?: return@forEach
                 val active = txType == type
                 btn.background = if (active) createRoundedRect(context, UiColors.AMBER_PRIMARY, 99f) else null
                 btn.setTextColor(if (active) Color.WHITE else UiColors.TEXT_SECONDARY)
@@ -540,8 +540,8 @@ object BottomSheetDialogs {
                     refreshCategoryGrid()
                 }
             }
-            segButtons[type] = btn
-            segGroup.addView(btn)
+            segmentButtons[type] = btn
+            segmentGroup.addView(btn)
         }
         refreshSegmentedButtons()
 
@@ -634,8 +634,8 @@ object BottomSheetDialogs {
                     return
                 }
                 "+", "-", "×", "÷" -> {
-                    val ops = setOf('+', '-', '×', '÷')
-                    calcExpr = if (calcExpr.lastOrNull() in ops) {
+                    val operators = setOf('+', '-', '×', '÷')
+                    calcExpr = if (calcExpr.lastOrNull() in operators) {
                         calcExpr.dropLast(1) + key
                     } else {
                         calcExpr + key
@@ -1432,8 +1432,8 @@ object BottomSheetDialogs {
 
         refreshCategoryTags = {
             tagsWrap.removeAllViews()
-            val curType = currentTxType()
-            val cats = repo.getCategories(curType)
+            val activeType = currentTxType()
+            val cats = repo.getCategories(activeType)
 
             cats.forEach { cat ->
                 val isEditing = editingCatId == cat.id
@@ -1527,8 +1527,8 @@ object BottomSheetDialogs {
                     onToast("請輸入分類名稱")
                     return@makeButtonPair
                 }
-                val curType = currentTxType()
-                val cats = repo.getCategories(curType)
+                val activeType = currentTxType()
+                val cats = repo.getCategories(activeType)
                 if (editingCatId != null) {
                     val target = cats.find { it.id == editingCatId }
                     if (target != null) {
@@ -1538,7 +1538,7 @@ object BottomSheetDialogs {
                     repo.save()
                     onToast("已更新「$selectedEmoji $name」分類 ✨")
                 } else {
-                    repo.addCategory(curType, name, selectedEmoji)
+                    repo.addCategory(activeType, name, selectedEmoji)
                     onToast("已新增「$selectedEmoji $name」分類")
                 }
                 resetFormMode()
