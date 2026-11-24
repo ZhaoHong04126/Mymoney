@@ -27,7 +27,7 @@ class LedgerRepository(context: Context) {
 
     companion object {
         private const val PREFS_NAME = "mymoney_warm_ledger_prefs"
-        private const val KEY_DATA_JSON = "mymoney_warm_ledger_v1"
+        private const val KEY_DATA_JSON = "mymoney_warm_ledger_v2"
         private val UTF8_BOM = Char(0xFEFF).toString()
     }
 
@@ -51,18 +51,6 @@ class LedgerRepository(context: Context) {
     fun save(target: AppData = data) {
         data = target
         prefs.edit { putString(KEY_DATA_JSON, toJsonObject(target).toString()) }
-    }
-
-    fun resetToDefaultData() {
-        val def = AppDefaults.createDefaultData()
-        save(def)
-    }
-
-    fun clearAllData() {
-        data.transactions.clear()
-        data.recurring.clear()
-        data.accounts.forEach { it.initialBalance = 0L }
-        save()
     }
 
     fun getCategories(type: TxType): MutableList<Category> = when (type) {

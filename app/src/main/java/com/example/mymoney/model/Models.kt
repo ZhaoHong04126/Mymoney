@@ -142,50 +142,8 @@ object AppDefaults {
             ),
             expenseCategories = defaultExpenseCategories(),
             incomeCategories = defaultIncomeCategories(),
-            recurring = mutableListOf(
-                RecurringItem(
-                    id = "rec_1",
-                    type = TxType.EXPENSE,
-                    day = 5,
-                    categoryId = "exp_home",
-                    accountId = "acc_bank",
-                    amount = 8500L,
-                    note = "每月溫馨小套房租金",
-                    lastAppliedMonth = ym
-                ),
-                RecurringItem(
-                    id = "rec_2",
-                    type = TxType.EXPENSE,
-                    day = 15,
-                    categoryId = "exp_fun",
-                    accountId = "acc_credit",
-                    amount = 390L,
-                    note = "Netflix 家庭方案訂閱",
-                    lastAppliedMonth = ym
-                ),
-                RecurringItem(
-                    id = "rec_3",
-                    type = TxType.INCOME,
-                    day = 5,
-                    categoryId = "inc_salary",
-                    accountId = "acc_bank",
-                    amount = 46000L,
-                    note = "本月薪資入帳",
-                    lastAppliedMonth = ym
-                )
-            ),
-            transactions = mutableListOf(
-                TransactionItem("tx_1", TxType.INCOME, "inc_salary", "acc_bank", null, 46000L, "$ym-05", "本月薪資入帳 💼"),
-                TransactionItem("tx_2", TxType.EXPENSE, "exp_home", "acc_bank", null, 8500L, "$ym-05", "每月溫馨小套房租金"),
-                TransactionItem("tx_3", TxType.TRANSFER, "transfer", "acc_bank", "acc_digital_pay", 3000L, "$ym-08", "儲值 LINE Pay 生活費"),
-                TransactionItem("tx_4", TxType.EXPENSE, "exp_grocery", "acc_digital_pay", null, 680L, "$ym-12", "全聯買牛奶、雞蛋與蔬菜"),
-                TransactionItem("tx_5", TxType.EXPENSE, "exp_fun", "acc_credit", null, 390L, "$ym-15", "Netflix 家庭方案訂閱"),
-                TransactionItem("tx_6", TxType.EXPENSE, "exp_shopping", "acc_credit", null, 1450L, "$ym-18", "MUJI 無印良品收納盒與香氛"),
-                TransactionItem("tx_7", TxType.INCOME, "inc_bonus", "acc_bank", null, 1200L, "$ym-20", "信用卡現金回饋與發票中獎"),
-                TransactionItem("tx_8", TxType.EXPENSE, "exp_transport", "acc_digital_pay", null, 1200L, "$ym-21", "通勤月票續購"),
-                TransactionItem("tx_9", TxType.EXPENSE, "exp_food", "acc_cash", null, 245L, "$ym-22", "暖呼呼日式拉麵晚餐"),
-                TransactionItem("tx_10", TxType.EXPENSE, "exp_drink", "acc_digital_pay", null, 135L, "$ym-23", "燕麥奶拿鐵 + 烤布蕾點心")
-            )
+            recurring = mutableListOf(),
+            transactions = mutableListOf()
         )
     }
 }
