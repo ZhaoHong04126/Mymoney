@@ -1,5 +1,6 @@
 package com.example.mymoney
 
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.graphics.RenderEffect
 import android.graphics.Shader
@@ -1181,7 +1182,48 @@ class MainActivity : AppCompatActivity() {
         ioSub.text = "將記帳紀錄存成檔案備份，或讀回以前的紀錄"
         page.addView(ioCard)
 
+        // 4. 底部版本號標示 (自動讀取 build.gradle.kts 之 versionName)
+        val versionBadge = TextView(this).apply {
+            text = getString(R.string.app_version_badge, getAppVersionName())
+            textSize = 12f
+            setTypeface(null, Typeface.BOLD)
+            setTextColor(UiColors.TEXT_SECONDARY)
+            gravity = Gravity.CENTER
+            background = createRoundedRect(
+                this@MainActivity,
+                UiColors.BG_INPUT,
+                99f,
+                UiColors.BORDER_WARM,
+                1f
+            )
+            setPadding(dp(14), dp(5), dp(14), dp(5))
+        }
+        page.addView(versionBadge, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            gravity = Gravity.CENTER_HORIZONTAL
+            topMargin = dp(20)
+        })
+
         return page
+    }
+
+    private fun getAppVersionName(): String {
+        return try {
+            val pkgInfo = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                packageManager.getPackageInfo(
+                    packageName,
+                    PackageManager.PackageInfoFlags.of(0)
+                )
+            } else {
+                @Suppress("DEPRECATION")
+                packageManager.getPackageInfo(packageName, 0)
+            }
+            pkgInfo.versionName ?: "1.0.0"
+        } catch (_: Exception) {
+            "1.0.0"
+        }
     }
 
     // =========================================================================

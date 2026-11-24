@@ -30,4 +30,5 @@
     <string name="recurring_status_pending">%1$s · 本月待入帳</string>
     <string name="category_edit_title">✎ 編輯「%1$s %2$s」（再點一次標籤可取消）</string>
     <string name="data_io_format_hint">※ 僅支援 CSV 與 JSON 檔案</string>
+    <string name="app_version_badge">暖暖記帳 v%1$s</string>
 </resources>
