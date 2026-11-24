@@ -1,4 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">暖暖記帳</string>
+    <string name="net_worth_title">淨資產總額 (NT$)</string>
+    <string name="zero_currency">$0</string>
+    <string name="month_label_format">%1$d年 %2$d月</string>
+    <string name="month_label_locked_format">%1$d年 %2$d月 🔒</string>
+    <string name="locked_month_title">%1$s 尚未開啟</string>
+    <string name="locked_month_desc">此月份早於您的首次登入月份（%1$s），介面已設為霧面鎖定狀態。</string>
+    <string name="unlock_month_btn">🔓 開啟 %1$s 帳本</string>
+    <string name="signed_amount_plus">+%1$s</string>
+    <string name="signed_amount_pair">%1$s%2$s</string>
+    <string name="net_worth_arrow">%1$s ›</string>
+    <string name="budget_used_format">已支出 %1$s (%2$d%%)</string>
+    <string name="budget_remain_format">剩餘可花 %1$s</string>
+    <string name="budget_over_format">超過預算 %1$s</string>
+    <string name="pending_recurring_title">本月有 %1$s 筆固定收支待入帳</string>
+    <string name="icon_name_pair">%1$s %2$s</string>
+    <string name="stats_pct_label">佔比 %1$s%%</string>
+    <string name="stats_total_count">共 %1$d 筆</string>
+    <string name="rank_record_count">%1$d 筆紀錄</string>
+    <string name="rank_amount_pct">%1$s  %2$s%%</string>
+    <string name="rank_sub_item">%1$s · %2$s</string>
+    <string name="account_initial_meta">初始 %1$s · 點擊編輯</string>
+    <string name="more_category_summary">目前共 %1$d 種支出、%2$d 種收入分類</string>
+    <string name="date_button_format">📅 %1$s</string>
+    <string name="plain_number_format">%1$d</string>
+    <string name="recurring_day_badge">每月 %1$d 日</string>
+    <string name="recurring_status_applied">%1$s · 本月已入帳 ✓</string>
+    <string name="recurring_status_pending">%1$s · 本月待入帳</string>
+    <string name="category_edit_title">✎ 編輯「%1$s %2$s」（再點一次標籤可取消）</string>
+    <string name="data_io_format_hint">※ 僅支援 CSV 與 JSON 檔案</string>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.mymoney.data
 
 import android.content.Context
+import androidx.core.content.edit
 import com.example.mymoney.model.Account
 import com.example.mymoney.model.AccountType
 import com.example.mymoney.model.AppData
@@ -27,6 +28,7 @@ class LedgerRepository(context: Context) {
     companion object {
         private const val PREFS_NAME = "mymoney_warm_ledger_prefs"
         private const val KEY_DATA_JSON = "mymoney_warm_ledger_v1"
+        private val UTF8_BOM = Char(0xFEFF).toString()
     }
 
     private fun load(): AppData {
@@ -48,7 +50,7 @@ class LedgerRepository(context: Context) {
 
     fun save(target: AppData = data) {
         data = target
-        prefs.edit().putString(KEY_DATA_JSON, toJsonObject(target).toString()).apply()
+        prefs.edit { putString(KEY_DATA_JSON, toJsonObject(target).toString()) }
     }
 
     fun resetToDefaultData() {
@@ -110,8 +112,7 @@ class LedgerRepository(context: Context) {
 
     fun isMonthLocked(ym: String): Boolean {
         val firstYm = data.firstLoginMonth.ifBlank { AppDefaults.currentYearMonthString() }
-        if (ym >= firstYm) return false
-        return ym !in data.unlockedMonths
+        return ym < firstYm && ym !in data.unlockedMonths
     }
 
     fun unlockMonth(ym: String) {
@@ -167,7 +168,7 @@ class LedgerRepository(context: Context) {
     }
 
     fun exportToCsv(): String {
-        val sb = StringBuilder("\uFEFF")
+        val sb = StringBuilder(UTF8_BOM)
         sb.append("日期,類型,分類,金額,帳戶,轉入帳戶,備註\r\n")
         val sorted = data.transactions.sortedByDescending { it.date }
         sorted.forEach { tx ->
@@ -183,14 +184,14 @@ class LedgerRepository(context: Context) {
     }
 
     fun parseCsvTransactions(rawContent: String): List<TransactionItem> {
-        val cleaned = rawContent.removePrefix("\uFEFF")
+        val cleaned = rawContent.removePrefix(UTF8_BOM)
         val lines = cleaned.split(Regex("\\r?\\n")).filter { it.isNotBlank() }
         if (lines.size <= 1) return emptyList()
 
         val imported = mutableListOf<TransactionItem>()
         val baseTime = System.currentTimeMillis()
 
-        for (i in 1 until lines.size) {
+        for (i in 1..<lines.size) {
             val cols = parseCsvLine(lines[i])
             if (cols.size >= 4) {
                 val date = cols[0].trim()
@@ -361,7 +362,7 @@ class LedgerRepository(context: Context) {
 
         val unlocked = mutableListOf<String>()
         obj.optJSONArray("unlockedMonths")?.let { arr ->
-            for (i in 0 until arr.length()) {
+            for (i in 0..<arr.length()) {
                 val ym = arr.optString(i)
                 if (ym.isNotBlank()) unlocked.add(ym)
             }
@@ -369,7 +370,7 @@ class LedgerRepository(context: Context) {
 
         val accounts = mutableListOf<Account>()
         obj.optJSONArray("accounts")?.let { arr ->
-            for (i in 0 until arr.length()) {
+            for (i in 0..<arr.length()) {
                 val a = arr.optJSONObject(i) ?: continue
                 accounts.add(
                     Account(
@@ -398,7 +399,7 @@ class LedgerRepository(context: Context) {
 
         // 兼容舊網頁版 customCategories 結構
         obj.optJSONArray("customCategories")?.let { arr ->
-            for (i in 0 until arr.length()) {
+            for (i in 0..<arr.length()) {
                 val c = arr.optJSONObject(i) ?: continue
                 val id = c.optString("id")
                 val name = c.optString("name")
@@ -414,7 +415,7 @@ class LedgerRepository(context: Context) {
 
         val recurring = mutableListOf<RecurringItem>()
         obj.optJSONArray("recurring")?.let { arr ->
-            for (i in 0 until arr.length()) {
+            for (i in 0..<arr.length()) {
                 val r = arr.optJSONObject(i) ?: continue
                 recurring.add(
                     RecurringItem(
@@ -447,7 +448,7 @@ class LedgerRepository(context: Context) {
 
     private fun parseCategoryArray(arr: JSONArray?, target: MutableList<Category>) {
         if (arr == null) return
-        for (i in 0 until arr.length()) {
+        for (i in 0..<arr.length()) {
             val c = arr.optJSONObject(i) ?: continue
             val id = c.optString("id")
             val name = c.optString("name")
@@ -461,7 +462,7 @@ class LedgerRepository(context: Context) {
     private fun parseTransactionsArray(arr: JSONArray?): MutableList<TransactionItem> {
         val list = mutableListOf<TransactionItem>()
         if (arr == null) return list
-        for (i in 0 until arr.length()) {
+        for (i in 0..<arr.length()) {
             val t = arr.optJSONObject(i) ?: continue
             val toId = t.optString("toAccountId").takeIf { it.isNotBlank() && it != "null" }
             list.add(

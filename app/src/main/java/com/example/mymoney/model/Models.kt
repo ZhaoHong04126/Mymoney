@@ -1,6 +1,6 @@
 package com.example.mymoney.model
 
-import android.graphics.Color
+import androidx.core.graphics.toColorInt
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
@@ -85,16 +85,16 @@ object AppDefaults {
     val YM_FORMATTER: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM")
 
     val CHART_COLORS: IntArray = intArrayOf(
-        Color.parseColor("#EE9B27"), // 暖陽琥珀
-        Color.parseColor("#DF6A4E"), // 柔和赤陶
-        Color.parseColor("#529985"), // 鼠尾草綠
-        Color.parseColor("#E6B84F"), // 蜂蜜奶油
-        Color.parseColor("#9C7A5B"), // 焦糖拿鐵
-        Color.parseColor("#D98A6C"), // 蜜桃奶茶
-        Color.parseColor("#6BA392"), // 薄荷青
-        Color.parseColor("#C48B71"), // 肉桂棕
-        Color.parseColor("#B59268"), // 燕麥奶
-        Color.parseColor("#7D8C75")  // 橄欖綠
+        "#EE9B27".toColorInt(), // 暖陽琥珀
+        "#DF6A4E".toColorInt(), // 柔和赤陶
+        "#529985".toColorInt(), // 鼠尾草綠
+        "#E6B84F".toColorInt(), // 蜂蜜奶油
+        "#9C7A5B".toColorInt(), // 焦糖拿鐵
+        "#D98A6C".toColorInt(), // 蜜桃奶茶
+        "#6BA392".toColorInt(), // 薄荷青
+        "#C48B71".toColorInt(), // 肉桂棕
+        "#B59268".toColorInt(), // 燕麥奶
+        "#7D8C75".toColorInt()  // 橄欖綠
     )
 
     val PROTECTED_CATEGORY_IDS: Set<String> = setOf("exp_other", "inc_other")

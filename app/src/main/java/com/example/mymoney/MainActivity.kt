@@ -25,11 +25,11 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.toColorInt
 import com.example.mymoney.data.JsonImportResult
 import com.example.mymoney.data.LedgerRepository
 import com.example.mymoney.model.AccountType
 import com.example.mymoney.model.AppDefaults
-import com.example.mymoney.model.TransactionItem
 import com.example.mymoney.model.TxType
 import com.example.mymoney.ui.BottomSheetDialogs
 import com.example.mymoney.ui.DonutChartView
@@ -246,12 +246,10 @@ class MainActivity : AppCompatActivity() {
             visibility = View.GONE
             textSize = 12.5f
             setTypeface(null, Typeface.BOLD)
-            setTextColor(Color.parseColor("#FFFDF8"))
-            background = createRoundedRect(this@MainActivity, Color.parseColor("#EB3D3127"), 99f)
+            setTextColor("#FFFDF8".toColorInt())
+            background = createRoundedRect(this@MainActivity, "#EB3D3127".toColorInt(), 99f)
             setPadding(dp(16), dp(8), dp(16), dp(8))
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                elevation = dpF(8f)
-            }
+            elevation = dpF(8f)
         }
         rootFrame.addView(toastTv, FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.WRAP_CONTENT,
@@ -278,8 +276,8 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             background = createGradientRect(
                 this@MainActivity,
-                Color.parseColor("#FCE4B4"),
-                Color.parseColor("#F5B851"),
+                "#FCE4B4".toColorInt(),
+                "#F5B851".toColorInt(),
                 12f
             )
         }
@@ -361,7 +359,7 @@ class MainActivity : AppCompatActivity() {
             visibility = View.GONE
             isClickable = true
             isFocusable = true
-            setBackgroundColor(Color.parseColor("#B3FAF5EC"))
+            setBackgroundColor("#B3FAF5EC".toColorInt())
             setPadding(dp(24), dp(24), dp(24), dp(24))
         }
 
@@ -370,15 +368,13 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER_HORIZONTAL
             background = createRoundedRect(
                 this@MainActivity,
-                Color.parseColor("#F5FFFDF8"),
+                "#F5FFFDF8".toColorInt(),
                 24f,
-                Color.parseColor("#EADBC5"),
+                "#EADBC5".toColorInt(),
                 1.5f
             )
             setPadding(dp(20), dp(22), dp(20), dp(18))
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                elevation = dpF(10f)
-            }
+            elevation = dpF(10f)
         }
 
         card.addView(TextView(this).apply {
@@ -429,8 +425,8 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             background = createGradientRect(
                 this@MainActivity,
-                Color.parseColor("#F6B94D"),
-                Color.parseColor("#EA901A"),
+                "#F6B94D".toColorInt(),
+                "#EA901A".toColorInt(),
                 14f
             )
             setPadding(dp(16), dp(12), dp(16), dp(12))
@@ -479,7 +475,7 @@ class MainActivity : AppCompatActivity() {
                 text = "本月總支出"
                 textSize = 12f
                 setTypeface(null, Typeface.BOLD)
-                setTextColor(Color.parseColor("#84633B"))
+                setTextColor("#84633B".toColorInt())
             })
             monthExpenseTv = TextView(this@MainActivity).apply {
                 textSize = 27f
@@ -493,9 +489,9 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.END
             background = createRoundedRect(
                 this@MainActivity,
-                Color.parseColor("#C7FFFDF8"),
+                "#C7FFFDF8".toColorInt(),
                 14f,
-                Color.parseColor("#B3EBC686"),
+                "#B3EBC686".toColorInt(),
                 1f
             )
             setPadding(dp(11), dp(6), dp(11), dp(6))
@@ -521,7 +517,7 @@ class MainActivity : AppCompatActivity() {
         ).apply { bottomMargin = dp(10) })
 
         heroCard.addView(View(this).apply {
-            setBackgroundColor(Color.parseColor("#4DBA9256"))
+            setBackgroundColor("#4DBA9256".toColorInt())
         }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(1)).apply {
             bottomMargin = dp(10)
         })
@@ -539,7 +535,7 @@ class MainActivity : AppCompatActivity() {
             addView(TextView(this@MainActivity).apply {
                 text = "本月收入 "
                 textSize = 12f
-                setTextColor(Color.parseColor("#7D6242"))
+                setTextColor("#7D6242".toColorInt())
             })
             monthIncomeTv = TextView(this@MainActivity).apply {
                 textSize = 12.5f
@@ -558,7 +554,7 @@ class MainActivity : AppCompatActivity() {
             addView(TextView(this@MainActivity).apply {
                 text = "總淨資產 "
                 textSize = 12f
-                setTextColor(Color.parseColor("#7D6242"))
+                setTextColor("#7D6242".toColorInt())
             })
             heroNetWorthTv = TextView(this@MainActivity).apply {
                 textSize = 12.5f
@@ -569,7 +565,7 @@ class MainActivity : AppCompatActivity() {
         }
         heroSub.addView(subLeft, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         heroSub.addView(View(this).apply {
-            setBackgroundColor(Color.parseColor("#59BA9256"))
+            setBackgroundColor("#59BA9256".toColorInt())
         }, LinearLayout.LayoutParams(dp(1), dp(14)).apply {
             marginStart = dp(8)
             marginEnd = dp(8)
@@ -923,9 +919,9 @@ class MainActivity : AppCompatActivity() {
             setPadding(dp(16), dp(16), dp(16), dp(16))
         }
         nwCard.addView(TextView(this).apply {
-            text = "淨資產總額 (NT$)"
+            text = getString(R.string.net_worth_title)
             textSize = 11.5f
-            setTextColor(Color.parseColor("#D8C7B5"))
+            setTextColor("#D8C7B5".toColorInt())
         })
         accNetWorthTv = TextView(this).apply {
             textSize = 26f
@@ -939,7 +935,7 @@ class MainActivity : AppCompatActivity() {
 
         val subGrid = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
-            background = createRoundedRect(this@MainActivity, Color.parseColor("#14FFFFFF"), 13f)
+            background = createRoundedRect(this@MainActivity, "#14FFFFFF".toColorInt(), 13f)
             setPadding(dp(12), dp(9), dp(12), dp(9))
         }
         val box1 = LinearLayout(this).apply {
@@ -947,7 +943,7 @@ class MainActivity : AppCompatActivity() {
             addView(TextView(this@MainActivity).apply {
                 text = "總資產"
                 textSize = 10.5f
-                setTextColor(Color.parseColor("#CBB9A6"))
+                setTextColor("#CBB9A6".toColorInt())
             })
             accAssetsTv = TextView(this@MainActivity).apply {
                 textSize = 14f
@@ -961,7 +957,7 @@ class MainActivity : AppCompatActivity() {
             addView(TextView(this@MainActivity).apply {
                 text = "信用卡/負債"
                 textSize = 10.5f
-                setTextColor(Color.parseColor("#CBB9A6"))
+                setTextColor("#CBB9A6".toColorInt())
             })
             accLiabilitiesTv = TextView(this@MainActivity).apply {
                 textSize = 14f
@@ -983,13 +979,13 @@ class MainActivity : AppCompatActivity() {
                 text = label
                 textSize = 12f
                 setTypeface(null, Typeface.BOLD)
-                setTextColor(Color.parseColor("#FCE2B1"))
+                setTextColor("#FCE2B1".toColorInt())
                 gravity = Gravity.CENTER
                 background = createRoundedRect(
                     this@MainActivity,
-                    Color.parseColor("#2EF9C971"),
+                    "#2EF9C971".toColorInt(),
                     12f,
-                    Color.parseColor("#66F9C971"),
+                    "#66F9C971".toColorInt(),
                     1f
                 )
                 setPadding(dp(10), dp(9), dp(10), dp(9))
@@ -1121,18 +1117,18 @@ class MainActivity : AppCompatActivity() {
         ).apply { bottomMargin = dp(12) })
 
         // 3. 資料維護
-        val maintCard = LinearLayout(this).apply {
+        val maintenanceCard = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = createRoundedRect(this@MainActivity, UiColors.BG_CARD, 20f, UiColors.BORDER_WARM, 1f)
             setPadding(dp(14), dp(13), dp(14), dp(13))
         }
-        maintCard.addView(TextView(this).apply {
+        maintenanceCard.addView(TextView(this).apply {
             text = "🧹 資料維護"
             textSize = 13.5f
             setTypeface(null, Typeface.BOLD)
             setTextColor(UiColors.TEXT_MAIN)
         })
-        maintCard.addView(TextView(this).apply {
+        maintenanceCard.addView(TextView(this).apply {
             text = "重置為預設範例資料或清空所有紀錄"
             textSize = 11f
             setTextColor(UiColors.TEXT_SECONDARY)
@@ -1141,7 +1137,7 @@ class MainActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { topMargin = dp(2); bottomMargin = dp(10) })
 
-        val maintBtns = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
+        val maintenanceButtons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         val reloadBtn = TextView(this).apply {
             text = "載入範例資料"
             textSize = 12.5f
@@ -1190,12 +1186,12 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        maintBtns.addView(reloadBtn, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
+        maintenanceButtons.addView(reloadBtn, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f).apply {
             marginEnd = dp(8)
         })
-        maintBtns.addView(clearBtn, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-        maintCard.addView(maintBtns)
-        page.addView(maintCard, LinearLayout.LayoutParams(
+        maintenanceButtons.addView(clearBtn, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+        maintenanceCard.addView(maintenanceButtons)
+        page.addView(maintenanceCard, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { bottomMargin = dp(12) })
@@ -1292,15 +1288,13 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             background = createGradientRect(
                 this@MainActivity,
-                Color.parseColor("#F6B94D"),
-                Color.parseColor("#EA901A"),
+                "#F6B94D".toColorInt(),
+                "#EA901A".toColorInt(),
                 16f,
                 UiColors.BG_CARD,
                 3f
             )
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                elevation = dpF(8f)
-            }
+            elevation = dpF(8f)
             setOnClickListener { openAddTransactionAction() }
         }
 
@@ -1379,7 +1373,11 @@ class MainActivity : AppCompatActivity() {
     // =========================================================================
     private fun renderAll() {
         val locked = repo.isMonthLocked(currentYmString())
-        monthLabelTv.text = "${currentYearMonth.year}年 ${currentYearMonth.monthValue}月${if (locked) " 🔒" else ""}"
+        monthLabelTv.text = getString(
+            if (locked) R.string.month_label_locked_format else R.string.month_label_format,
+            currentYearMonth.year,
+            currentYearMonth.monthValue
+        )
 
         navTabs.forEach { (tab, pair) ->
             val active = tab == activeTab
@@ -1400,11 +1398,15 @@ class MainActivity : AppCompatActivity() {
         val ym = currentYmString()
         val locked = activeTab != Tab.MORE && repo.isMonthLocked(ym)
         if (locked) {
-            val label = "${currentYearMonth.year}年 ${currentYearMonth.monthValue}月"
+            val label = getString(
+                R.string.month_label_format,
+                currentYearMonth.year,
+                currentYearMonth.monthValue
+            )
             val firstLabel = formatYmLabel(repo.data.firstLoginMonth)
-            lockedTitleTv.text = "$label 尚未開啟"
-            lockedDescTv.text = "此月份早於您的首次登入月份（$firstLabel），介面已設為霧面鎖定狀態。"
-            unlockMonthBtn.text = "🔓 開啟 $label 帳本"
+            lockedTitleTv.text = getString(R.string.locked_month_title, label)
+            lockedDescTv.text = getString(R.string.locked_month_desc, firstLabel)
+            unlockMonthBtn.text = getString(R.string.unlock_month_btn, label)
 
             mainScrollView.scrollTo(0, 0)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -1474,8 +1476,13 @@ class MainActivity : AppCompatActivity() {
 
         monthExpenseTv.text = formatCurrency(monthExpense)
         monthIncomeTv.text = formatCurrency(monthIncome)
-        monthNetBalanceTv.text = (if (netBalance >= 0) "+" else "") + formatCurrency(netBalance)
-        heroNetWorthTv.text = "${formatCurrency(totalNetWorth)} ›"
+        val formattedBalance = formatCurrency(netBalance)
+        monthNetBalanceTv.text = if (netBalance >= 0L) {
+            getString(R.string.signed_amount_plus, formattedBalance)
+        } else {
+            formattedBalance
+        }
+        heroNetWorthTv.text = getString(R.string.net_worth_arrow, formatCurrency(totalNetWorth))
 
         // 預算進度條
         val budget = repo.data.monthlyBudget
@@ -1488,25 +1495,25 @@ class MainActivity : AppCompatActivity() {
                 budgetStatusTagTv.text = "尚未設定預算"
                 budgetStatusTagTv.setTextColor(UiColors.INCOME)
                 budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f)
-                budgetProgressFill.background = createGradientRect(this, Color.parseColor("#F6C36B"), UiColors.AMBER_PRIMARY, 99f)
+                budgetProgressFill.background = createGradientRect(this, "#F6C36B".toColorInt(), UiColors.AMBER_PRIMARY, 99f)
             }
             rawPct >= 100 -> {
                 budgetStatusTagTv.text = "已超支提醒 🐾"
                 budgetStatusTagTv.setTextColor(UiColors.EXPENSE)
                 budgetStatusTagTv.background = createRoundedRect(this, UiColors.EXPENSE_BG, 99f)
-                budgetProgressFill.background = createGradientRect(this, Color.parseColor("#E8836B"), Color.parseColor("#D9534F"), 99f)
+                budgetProgressFill.background = createGradientRect(this, "#E8836B".toColorInt(), "#D9534F".toColorInt(), 99f)
             }
             rawPct >= 80 -> {
                 budgetStatusTagTv.text = "接近預算上限"
                 budgetStatusTagTv.setTextColor(UiColors.WARN_TEXT)
                 budgetStatusTagTv.background = createRoundedRect(this, UiColors.WARN_BG, 99f)
-                budgetProgressFill.background = createGradientRect(this, Color.parseColor("#F5B041"), Color.parseColor("#E67E22"), 99f)
+                budgetProgressFill.background = createGradientRect(this, "#F5B041".toColorInt(), "#E67E22".toColorInt(), 99f)
             }
             else -> {
                 budgetStatusTagTv.text = "安心花費中 ✨"
                 budgetStatusTagTv.setTextColor(UiColors.INCOME)
                 budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f)
-                budgetProgressFill.background = createGradientRect(this, Color.parseColor("#F6C36B"), UiColors.AMBER_PRIMARY, 99f)
+                budgetProgressFill.background = createGradientRect(this, "#F6C36B".toColorInt(), UiColors.AMBER_PRIMARY, 99f)
             }
         }
 
@@ -1518,14 +1525,18 @@ class MainActivity : AppCompatActivity() {
                 budgetProgressFill.layoutParams = lp
             }
         }
-        budgetUsedTv.text = "已支出 ${formatCurrency(monthExpense)} ($rawPct%)"
-        budgetRemainTv.text = if (remain >= 0L) "剩餘可花 ${formatCurrency(remain)}" else "超過預算 ${formatCurrency(abs(remain))}"
+        budgetUsedTv.text = getString(R.string.budget_used_format, formatCurrency(monthExpense), rawPct)
+        budgetRemainTv.text = if (remain >= 0L) {
+            getString(R.string.budget_remain_format, formatCurrency(remain))
+        } else {
+            getString(R.string.budget_over_format, formatCurrency(abs(remain)))
+        }
 
         // 固定週期收支待入帳橫幅
         val pendingRecs = repo.data.recurring.filter { it.lastAppliedMonth != ym }
         if (pendingRecs.isNotEmpty()) {
             recurringBanner.visibility = View.VISIBLE
-            recurringBannerTitleTv.text = "本月有 ${pendingRecs.size} 筆固定收支待入帳"
+            recurringBannerTitleTv.text = getString(R.string.pending_recurring_title, pendingRecs.size.toString())
             recurringBannerDescTv.text = pendingRecs.take(2).joinToString("、") { it.note }
         } else {
             recurringBanner.visibility = View.GONE
@@ -1691,7 +1702,7 @@ class MainActivity : AppCompatActivity() {
                     TxType.TRANSFER -> UiColors.TRANSFER
                 }
                 row.addView(TextView(this).apply {
-                    text = "$sign${formatCurrency(tx.amount)}"
+                    text = getString(R.string.signed_amount_pair, sign, formatCurrency(tx.amount))
                     textSize = 14.5f
                     setTypeface(null, Typeface.BOLD)
                     setTextColor(amtColor)
@@ -1736,7 +1747,7 @@ class MainActivity : AppCompatActivity() {
         if (grouped.isEmpty() || totalAmount <= 0L) {
             donutChartView.setData(emptyList(), 0L, null) {}
             donutCenterLabelTv.text = if (isExp) "本月總支出" else "本月總收入"
-            donutCenterAmountTv.text = "$0"
+            donutCenterAmountTv.text = getString(R.string.zero_currency)
             donutCenterPctTv.text = "尚無資料"
             categoryRankContainer.addView(
                 buildEmptyCard(
@@ -1761,13 +1772,13 @@ class MainActivity : AppCompatActivity() {
         if (activeEntry != null) {
             val cat = repo.getCategoryById(activeEntry.first, statsType)
             val pct = ((activeEntry.second.toDouble() / totalAmount.toDouble()) * 1000).roundToInt() / 10.0
-            donutCenterLabelTv.text = "${cat.icon} ${cat.name}"
+            donutCenterLabelTv.text = getString(R.string.icon_name_pair, cat.icon, cat.name)
             donutCenterAmountTv.text = formatCurrency(activeEntry.second)
-            donutCenterPctTv.text = "佔比 $pct%"
+            donutCenterPctTv.text = getString(R.string.stats_pct_label, pct.toString())
         } else {
             donutCenterLabelTv.text = if (isExp) "本月總支出" else "本月總收入"
             donutCenterAmountTv.text = formatCurrency(totalAmount)
-            donutCenterPctTv.text = "共 ${txs.size} 筆"
+            donutCenterPctTv.text = getString(R.string.stats_total_count, txs.size)
         }
 
         grouped.forEachIndexed { idx, (catId, amt, items) ->
@@ -1782,7 +1793,7 @@ class MainActivity : AppCompatActivity() {
                     this@MainActivity,
                     UiColors.BG_CARD,
                     16f,
-                    if (selectedStatCategoryId == catId) Color.parseColor("#E5C899") else UiColors.BORDER_WARM,
+                    if (selectedStatCategoryId == catId) "#E5C899".toColorInt() else UiColors.BORDER_WARM,
                     1f
                 )
                 setPadding(dp(13), dp(11), dp(13), dp(11))
@@ -1813,14 +1824,14 @@ class MainActivity : AppCompatActivity() {
                     setTextColor(UiColors.TEXT_MAIN)
                 })
                 addView(TextView(this@MainActivity).apply {
-                    text = "${items.size} 筆紀錄"
+                    text = getString(R.string.rank_record_count, items.size)
                     textSize = 11f
                     setTextColor(UiColors.TEXT_MUTED)
                 })
             }
             topRow.addView(nameCol, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
             topRow.addView(TextView(this).apply {
-                text = "${formatCurrency(amt)}  $pct%"
+                text = getString(R.string.rank_amount_pct, formatCurrency(amt), pct.toString())
                 textSize = 13.5f
                 setTypeface(null, Typeface.BOLD)
                 setTextColor(UiColors.TEXT_MAIN)
@@ -1859,7 +1870,7 @@ class MainActivity : AppCompatActivity() {
                 items.forEach { t ->
                     val subRow = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
                     subRow.addView(TextView(this).apply {
-                        text = "${t.date.drop(5)} · ${t.note.ifBlank { cat.name }}"
+                        text = getString(R.string.rank_sub_item, t.date.drop(5), t.note.ifBlank { cat.name })
                         textSize = 11.5f
                         setTextColor(UiColors.TEXT_SECONDARY)
                     }, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
@@ -1901,7 +1912,7 @@ class MainActivity : AppCompatActivity() {
         accountsListContainer.removeAllViews()
         val grouped = repo.data.accounts.groupBy { it.type }
 
-        AccountType.values().forEach { accType ->
+        AccountType.entries.forEach { accType ->
             val list = grouped[accType].orEmpty()
             if (list.isEmpty()) return@forEach
 
@@ -1946,7 +1957,7 @@ class MainActivity : AppCompatActivity() {
                         setTextColor(UiColors.TEXT_MAIN)
                     })
                     addView(TextView(this@MainActivity).apply {
-                        text = "初始 ${formatCurrency(acc.initialBalance)} · 點擊編輯"
+                        text = getString(R.string.account_initial_meta, formatCurrency(acc.initialBalance))
                         textSize = 11f
                         setTextColor(UiColors.TEXT_MUTED)
                     })
@@ -1977,7 +1988,7 @@ class MainActivity : AppCompatActivity() {
 
         val expCount = repo.data.expenseCategories.size
         val incCount = repo.data.incomeCategories.size
-        moreCategorySummaryTv.text = "目前共 $expCount 種支出、$incCount 種收入分類"
+        moreCategorySummaryTv.text = getString(R.string.more_category_summary, expCount, incCount)
     }
 
     private fun buildEmptyCard(icon: String, title: String, desc: String): LinearLayout {

@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
-import android.os.Build
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -12,6 +11,8 @@ import android.view.ViewGroup
 import android.view.Window
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
+import androidx.core.view.isGone
 import java.text.NumberFormat
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -21,43 +22,43 @@ import kotlin.math.max
 import kotlin.math.roundToLong
 
 object UiColors {
-    val BG_PAGE = Color.parseColor("#EFE8DC")
-    val BG_SCREEN = Color.parseColor("#FAF5EC")
-    val BG_CARD = Color.parseColor("#FFFDF8")
-    val BG_INPUT = Color.parseColor("#F6F0E4")
-    val BG_DAY_HEADER = Color.parseColor("#F9F2E6")
-    val DIVIDER = Color.parseColor("#F3ECE0")
+    val BG_PAGE = "#EFE8DC".toColorInt()
+    val BG_SCREEN = "#FAF5EC".toColorInt()
+    val BG_CARD = "#FFFDF8".toColorInt()
+    val BG_INPUT = "#F6F0E4".toColorInt()
+    val BG_DAY_HEADER = "#F9F2E6".toColorInt()
+    val DIVIDER = "#F3ECE0".toColorInt()
 
-    val AMBER_PRIMARY = Color.parseColor("#EE9B27")
-    val AMBER_DARK = Color.parseColor("#D68111")
-    val AMBER_LIGHT = Color.parseColor("#FCE8C3")
-    val AMBER_TEXT_DARK = Color.parseColor("#9A5B06")
+    val AMBER_PRIMARY = "#EE9B27".toColorInt()
+    val AMBER_DARK = "#D68111".toColorInt()
+    val AMBER_LIGHT = "#FCE8C3".toColorInt()
+    val AMBER_TEXT_DARK = "#9A5B06".toColorInt()
 
-    val HERO_GRAD_START = Color.parseColor("#FFF7E5")
-    val HERO_GRAD_END = Color.parseColor("#FCE5BA")
-    val HERO_BORDER = Color.parseColor("#F3D59B")
+    val HERO_GRAD_START = "#FFF7E5".toColorInt()
+    val HERO_GRAD_END = "#FCE5BA".toColorInt()
+    val HERO_BORDER = "#F3D59B".toColorInt()
 
-    val EXPENSE = Color.parseColor("#DF6A4E")
-    val EXPENSE_BG = Color.parseColor("#FCECE8")
-    val EXPENSE_BORDER = Color.parseColor("#F2C6BC")
-    val INCOME = Color.parseColor("#46937E")
-    val INCOME_BG = Color.parseColor("#E5F4EF")
-    val TRANSFER = Color.parseColor("#8E6E53")
-    val TRANSFER_BG = Color.parseColor("#F2EBE3")
+    val EXPENSE = "#DF6A4E".toColorInt()
+    val EXPENSE_BG = "#FCECE8".toColorInt()
+    val EXPENSE_BORDER = "#F2C6BC".toColorInt()
+    val INCOME = "#46937E".toColorInt()
+    val INCOME_BG = "#E5F4EF".toColorInt()
+    val TRANSFER = "#8E6E53".toColorInt()
+    val TRANSFER_BG = "#F2EBE3".toColorInt()
 
-    val WARN_BG = Color.parseColor("#FFF1D6")
-    val WARN_TEXT = Color.parseColor("#C87609")
-    val BANNER_BG = Color.parseColor("#FFF9EB")
-    val BANNER_BORDER = Color.parseColor("#F4D89E")
+    val WARN_BG = "#FFF1D6".toColorInt()
+    val WARN_TEXT = "#C87609".toColorInt()
+    val BANNER_BG = "#FFF9EB".toColorInt()
+    val BANNER_BORDER = "#F4D89E".toColorInt()
 
-    val DARK_NW_START = Color.parseColor("#4E3E30")
-    val DARK_NW_END = Color.parseColor("#382B20")
-    val DARK_NW_GOLD = Color.parseColor("#F9C971")
+    val DARK_NW_START = "#4E3E30".toColorInt()
+    val DARK_NW_END = "#382B20".toColorInt()
+    val DARK_NW_GOLD = "#F9C971".toColorInt()
 
-    val TEXT_MAIN = Color.parseColor("#3D3127")
-    val TEXT_SECONDARY = Color.parseColor("#7B6B5D")
-    val TEXT_MUTED = Color.parseColor("#A69688")
-    val BORDER_WARM = Color.parseColor("#EAE0D1")
+    val TEXT_MAIN = "#3D3127".toColorInt()
+    val TEXT_SECONDARY = "#7B6B5D".toColorInt()
+    val TEXT_MUTED = "#A69688".toColorInt()
+    val BORDER_WARM = "#EAE0D1".toColorInt()
 }
 
 fun Context.dp(value: Int): Int =
@@ -255,9 +256,9 @@ class WrapLayout(context: Context) : ViewGroup(context) {
         var totalHeight = paddingTop + paddingBottom
         var maxUsedWidth = 0
 
-        for (i in 0 until childCount) {
+        for (i in 0..<childCount) {
             val child = getChildAt(i)
-            if (child.visibility == View.GONE) continue
+            if (child.isGone) continue
             measureChild(child, widthMeasureSpec, heightMeasureSpec)
             val cw = child.measuredWidth
             val ch = child.measuredHeight
@@ -286,9 +287,9 @@ class WrapLayout(context: Context) : ViewGroup(context) {
         var y = paddingTop
         var rowHeight = 0
 
-        for (i in 0 until childCount) {
+        for (i in 0..<childCount) {
             val child = getChildAt(i)
-            if (child.visibility == View.GONE) continue
+            if (child.isGone) continue
             val cw = child.measuredWidth
             val ch = child.measuredHeight
 
@@ -326,9 +327,7 @@ fun showWarmConfirmDialog(
         gravity = Gravity.CENTER_HORIZONTAL
         background = createRoundedRect(context, UiColors.BG_CARD, 24f, UiColors.BORDER_WARM, 1f)
         setPadding(context.dp(18), context.dp(20), context.dp(18), context.dp(16))
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            elevation = context.dpF(12f)
-        }
+        elevation = context.dpF(12f)
     }
 
     val iconTv = TextView(context).apply {

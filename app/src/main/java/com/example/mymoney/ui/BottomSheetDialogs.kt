@@ -22,6 +22,7 @@ import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
+import androidx.core.graphics.toColorInt
 import com.example.mymoney.R
 import com.example.mymoney.data.LedgerRepository
 import com.example.mymoney.model.Account
@@ -32,6 +33,7 @@ import com.example.mymoney.model.RecurringItem
 import com.example.mymoney.model.TransactionItem
 import com.example.mymoney.model.TxType
 import java.time.LocalDate
+import java.util.Locale
 
 object BottomSheetDialogs {
 
@@ -51,7 +53,7 @@ object BottomSheetDialogs {
 
         // 頂部拖曳橫條指示器
         val handle = View(context).apply {
-            background = createRoundedRect(context, Color.parseColor("#D5C8B8"), 99f)
+            background = createRoundedRect(context, "#D5C8B8".toColorInt(), 99f)
         }
         container.addView(handle, LinearLayout.LayoutParams(context.dp(38), context.dp(4)).apply {
             gravity = Gravity.CENTER_HORIZONTAL
@@ -243,7 +245,7 @@ object BottomSheetDialogs {
         val amountBox = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            background = createRoundedRect(context, UiColors.BG_CARD, 16f, Color.parseColor("#EDD9B4"), 1.5f)
+            background = createRoundedRect(context, UiColors.BG_CARD, 16f, "#EDD9B4".toColorInt(), 1.5f)
             setPadding(context.dp(12), context.dp(9), context.dp(12), context.dp(9))
         }
         val catBadgeIcon = TextView(context).apply { textSize = 20f }
@@ -355,7 +357,7 @@ object BottomSheetDialogs {
         singleAccSpinner.background = null
 
         val dateBtn = TextView(context).apply {
-            text = "📅 $selectedDate"
+            text = context.getString(R.string.date_button_format, selectedDate)
             textSize = 12.5f
             setTypeface(null, Typeface.BOLD)
             setTextColor(UiColors.TEXT_MAIN)
@@ -367,8 +369,8 @@ object BottomSheetDialogs {
                 DatePickerDialog(
                     context,
                     { _, y, m, d ->
-                        selectedDate = String.format("%04d-%02d-%02d", y, m + 1, d)
-                        text = "📅 $selectedDate"
+                        selectedDate = String.format(Locale.US, "%04d-%02d-%02d", y, m + 1, d)
+                        text = context.getString(R.string.date_button_format, selectedDate)
                     },
                     parsed.year,
                     parsed.monthValue - 1,
@@ -442,7 +444,7 @@ object BottomSheetDialogs {
             catBadgeName.text = chosen.name
 
             val totalTiles = cats.size + 1
-            for (idx in 0 until totalTiles) {
+            for (idx in 0..<totalTiles) {
                 val isManageTile = idx == cats.size
                 val cat = if (!isManageTile) cats[idx] else null
                 val isActive = cat != null && cat.id == selectedCatId
@@ -499,7 +501,7 @@ object BottomSheetDialogs {
                 catGrid.addView(tile, params)
             }
             if (totalTiles < 5) {
-                for (emptyCol in totalTiles until 5) {
+                for (emptyCol in totalTiles..<5) {
                     val spacer = View(context)
                     val params = GridLayout.LayoutParams(
                         GridLayout.spec(0),
@@ -513,14 +515,14 @@ object BottomSheetDialogs {
         // 建立 支出 / 收入 / 轉帳 切換按鈕
         val segButtons = mutableMapOf<TxType, TextView>()
         fun refreshSegmentedButtons() {
-            TxType.values().forEach { type ->
+            TxType.entries.forEach { type ->
                 val btn = segButtons[type] ?: return@forEach
                 val active = txType == type
                 btn.background = if (active) createRoundedRect(context, UiColors.AMBER_PRIMARY, 99f) else null
                 btn.setTextColor(if (active) Color.WHITE else UiColors.TEXT_SECONDARY)
             }
         }
-        TxType.values().forEach { type ->
+        TxType.entries.forEach { type ->
             val btn = TextView(context).apply {
                 text = type.label
                 textSize = 12f
@@ -675,9 +677,9 @@ object BottomSheetDialogs {
                 setTypeface(null, Typeface.BOLD)
                 gravity = Gravity.CENTER
                 background = when {
-                    isOk -> createGradientRect(context, Color.parseColor("#F4B247"), Color.parseColor("#E68D18"), 12f)
+                    isOk -> createGradientRect(context, "#F4B247".toColorInt(), "#E68D18".toColorInt(), 12f)
                     isClear -> createRoundedRect(context, UiColors.EXPENSE_BG, 12f, UiColors.EXPENSE_BORDER, 1f)
-                    isOp -> createRoundedRect(context, Color.parseColor("#F5EAD8"), 12f, UiColors.BORDER_WARM, 1f)
+                    isOp -> createRoundedRect(context, "#F5EAD8".toColorInt(), 12f, UiColors.BORDER_WARM, 1f)
                     else -> createRoundedRect(context, UiColors.BG_CARD, 12f, UiColors.BORDER_WARM, 1f)
                 }
                 setTextColor(
@@ -744,7 +746,7 @@ object BottomSheetDialogs {
 
         container.addView(makeFieldLabel(context, "每月預算金額 (NT$)"))
         val input = makeWarmInput(context, "例如 10000", InputType.TYPE_CLASS_NUMBER).apply {
-            setText(repo.data.monthlyBudget.toString())
+            setText(context.getString(R.string.plain_number_format, repo.data.monthlyBudget))
             setSelection(text.length)
         }
         container.addView(input, LinearLayout.LayoutParams(
@@ -777,7 +779,7 @@ object BottomSheetDialogs {
                 setTypeface(null, Typeface.BOLD)
                 setPadding(context.dp(12), context.dp(6), context.dp(12), context.dp(6))
                 setOnClickListener {
-                    input.setText(v.toString())
+                    input.setText(context.getString(R.string.plain_number_format, v))
                     input.setSelection(input.text.length)
                     syncChipHighlight()
                 }
@@ -887,7 +889,7 @@ object BottomSheetDialogs {
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { topMargin = context.dp(4); bottomMargin = context.dp(10) })
 
-        val types = AccountType.values().toList()
+        val types = AccountType.entries
         val typeSpinner = makeWarmSpinner(
             context,
             types.map { it.spinnerLabel },
@@ -898,7 +900,7 @@ object BottomSheetDialogs {
             "0",
             InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
         ).apply {
-            setText((editingAccount?.initialBalance ?: 0L).toString())
+            setText(context.getString(R.string.plain_number_format, editingAccount?.initialBalance ?: 0L))
         }
 
         val twoCol = LinearLayout(context).apply { orientation = LinearLayout.HORIZONTAL }
@@ -930,10 +932,10 @@ object BottomSheetDialogs {
         container.addView(makeFieldLabel(context, "代表圖示"))
         val emojis = listOf("💵", "👛", "🏦", "💳", "📱", "🐷", "💎")
         val emojiRow = WrapLayout(context)
-        val emojiBtns = mutableMapOf<String, TextView>()
+        val emojiButtons = mutableMapOf<String, TextView>()
         fun refreshEmojiPicker() {
             emojis.forEach { em ->
-                val v = emojiBtns[em] ?: return@forEach
+                val v = emojiButtons[em] ?: return@forEach
                 val active = em == selectedEmoji
                 v.background = createRoundedRect(
                     context,
@@ -954,7 +956,7 @@ object BottomSheetDialogs {
                     refreshEmojiPicker()
                 }
             }
-            emojiBtns[em] = tv
+            emojiButtons[em] = tv
             emojiRow.addView(tv, ViewGroup.LayoutParams(context.dp(38), context.dp(38)))
         }
         refreshEmojiPicker()
@@ -1061,7 +1063,7 @@ object BottomSheetDialogs {
                     setPadding(context.dp(10), context.dp(9), context.dp(10), context.dp(9))
                 }
                 val dayBadge = TextView(context).apply {
-                    text = "每月 ${rec.day} 日"
+                    text = context.getString(R.string.recurring_day_badge, rec.day)
                     textSize = 10.5f
                     setTypeface(null, Typeface.BOLD)
                     setTextColor(UiColors.AMBER_TEXT_DARK)
@@ -1072,19 +1074,26 @@ object BottomSheetDialogs {
                     orientation = LinearLayout.VERTICAL
                     setPadding(context.dp(8), 0, context.dp(6), 0)
                     addView(TextView(context).apply {
-                        text = "${cat.icon} ${rec.note.ifBlank { cat.name }}"
+                        text = context.getString(R.string.icon_name_pair, cat.icon, rec.note.ifBlank { cat.name })
                         textSize = 12.5f
                         setTypeface(null, Typeface.BOLD)
                         setTextColor(UiColors.TEXT_MAIN)
                     })
                     addView(TextView(context).apply {
-                        text = "${acc.name} · ${if (applied) "本月已入帳 ✓" else "本月待入帳"}"
+                        text = context.getString(
+                            if (applied) R.string.recurring_status_applied else R.string.recurring_status_pending,
+                            acc.name
+                        )
                         textSize = 10.5f
                         setTextColor(UiColors.TEXT_SECONDARY)
                     })
                 }
                 val amtTv = TextView(context).apply {
-                    text = (if (rec.type == TxType.INCOME) "+" else "-") + formatCurrency(rec.amount)
+                    text = context.getString(
+                        R.string.signed_amount_pair,
+                        if (rec.type == TxType.INCOME) "+" else "-",
+                        formatCurrency(rec.amount)
+                    )
                     textSize = 13f
                     setTypeface(null, Typeface.BOLD)
                     setTextColor(if (rec.type == TxType.INCOME) UiColors.INCOME else UiColors.EXPENSE)
@@ -1452,7 +1461,7 @@ object BottomSheetDialogs {
                             editingCatId = cat.id
                             selectedEmoji = cat.icon
                             nameInput.setText(cat.name)
-                            formTitleTv.text = "✎ 編輯「${cat.icon} ${cat.name}」（再點一次標籤可取消）"
+                            formTitleTv.text = context.getString(R.string.category_edit_title, cat.icon, cat.name)
                             saveCatBtn.text = "儲存修改 ✓"
                             refreshEmojiPicker()
                             refreshCategoryTags()
@@ -1461,7 +1470,7 @@ object BottomSheetDialogs {
                 }
 
                 pill.addView(TextView(context).apply {
-                    text = "${cat.icon} ${cat.name}"
+                    text = context.getString(R.string.icon_name_pair, cat.icon, cat.name)
                     textSize = 12f
                     setTypeface(null, Typeface.BOLD)
                     setTextColor(UiColors.TEXT_MAIN)
@@ -1592,7 +1601,7 @@ object BottomSheetDialogs {
         ).apply { topMargin = context.dp(3) })
 
         container.addView(TextView(context).apply {
-            text = "※ 僅支援 CSV 與 JSON 檔案"
+            text = context.getString(R.string.data_io_format_hint)
             textSize = 11.5f
             setTypeface(null, Typeface.BOLD)
             setTextColor(UiColors.AMBER_DARK)
