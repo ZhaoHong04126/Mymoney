@@ -26,6 +26,10 @@ import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.graphics.toColorInt
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.mymoney.data.JsonImportResult
 import com.example.mymoney.data.LedgerRepository
 import com.example.mymoney.model.AccountType
@@ -82,6 +86,11 @@ class MainActivity : AppCompatActivity() {
 
     // 底部導覽與吐司
     private val navTabs = mutableMapOf<Tab, Pair<TextView, TextView>>()
+    private lateinit var bottomNavBgView: View
+    private lateinit var bottomNavBarRow: LinearLayout
+    private lateinit var bottomNavTopBorder: View
+    private lateinit var bottomNavSysDivider: View
+    private lateinit var bottomNavFabBtn: TextView
     private lateinit var toastTv: TextView
     private val toastHandler = Handler(Looper.getMainLooper())
     private var toastHideRunnable: Runnable? = null
@@ -149,6 +158,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            window.isNavigationBarContrastEnforced = false
+        }
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = true
+            isAppearanceLightNavigationBars = true
+        }
         repo = LedgerRepository(this)
         buildRootUi()
         setupBackNavigation()
@@ -185,7 +202,6 @@ class MainActivity : AppCompatActivity() {
     private fun buildRootUi() {
         val rootFrame = FrameLayout(this).apply {
             setBackgroundColor(UiColors.BG_SCREEN)
-            fitsSystemWindows = true
         }
 
         val rootColumn = LinearLayout(this).apply {
@@ -193,16 +209,18 @@ class MainActivity : AppCompatActivity() {
         }
 
         // 1. 頂部標題列與月份切換器
-        rootColumn.addView(buildHeaderBar())
+        val headerBar = buildHeaderBar()
+        rootColumn.addView(headerBar)
 
         // 2. 中央內容區 (ScrollView + 早於首次登入月份之霧面鎖定遮罩)
         val contentHost = FrameLayout(this)
         mainScrollView = ScrollView(this).apply {
             isVerticalScrollBarEnabled = false
+            clipToPadding = false
         }
         val scrollInner = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(dp(14), dp(4), dp(14), dp(22))
+            setPadding(dp(14), dp(4), dp(14), dp(28))
         }
 
         pageLedger = buildLedgerPage()
@@ -256,10 +274,39 @@ class MainActivity : AppCompatActivity() {
             FrameLayout.LayoutParams.WRAP_CONTENT,
             Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
         ).apply {
-            bottomMargin = dp(78)
+            bottomMargin = dp(94)
         })
 
+        ViewCompat.setOnApplyWindowInsetsListener(rootFrame) { _, insets ->
+            val sysBars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            val gestures = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
+            val systemBottom = maxOf(sysBars.bottom, gestures.bottom)
+            val bottomOffset = systemBottom + dp(12)
+
+            headerBar.setPadding(
+                dp(16) + sysBars.left,
+                dp(10) + sysBars.top,
+                dp(16) + sysBars.right,
+                dp(10)
+            )
+            scrollInner.setPadding(
+                dp(14) + sysBars.left,
+                dp(4),
+                dp(14) + sysBars.right,
+                dp(28)
+            )
+            applyBottomNavInsets(systemBottom, bottomOffset, sysBars.left, sysBars.right)
+
+            toastTv.layoutParams = (toastTv.layoutParams as FrameLayout.LayoutParams).apply {
+                bottomMargin = bottomOffset + dp(82)
+            }
+            insets
+        }
+
         setContentView(rootFrame)
+        ViewCompat.requestApplyInsets(rootFrame)
     }
 
     private fun buildHeaderBar(): LinearLayout {
@@ -1141,22 +1188,27 @@ class MainActivity : AppCompatActivity() {
     // 底部導覽列
     // =========================================================================
     private fun buildBottomNavBar(): FrameLayout {
+        val defaultBottomOffset = dp(12)
         val wrapper = FrameLayout(this).apply {
             clipChildren = false
             clipToPadding = false
         }
 
-        val bar = LinearLayout(this).apply {
+        bottomNavBgView = View(this).apply {
+            setBackgroundColor(UiColors.BG_CARD)
+            isClickable = true
+        }
+
+        bottomNavBarRow = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            setBackgroundColor(UiColors.BG_CARD)
         }
 
         fun makeNavSlot(tab: Tab, icon: String, label: String): LinearLayout {
             val slot = LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER
-                setPadding(0, dp(6), 0, dp(6))
+                gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+                setPadding(0, dp(6), 0, dp(8))
                 setOnClickListener { switchTab(tab) }
             }
             val iconTv = TextView(this).apply {
@@ -1172,35 +1224,42 @@ class MainActivity : AppCompatActivity() {
             }
             navTabs[tab] = Pair(iconTv, labelTv)
             slot.addView(iconTv)
-            slot.addView(labelTv)
+            slot.addView(labelTv, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.WRAP_CONTENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply { topMargin = dp(2) })
             return slot
         }
 
-        bar.addView(makeNavSlot(Tab.LEDGER, "📒", "明細"), LinearLayout.LayoutParams(0, dp(62), 1f))
-        bar.addView(makeNavSlot(Tab.STATS, "🍩", "統計"), LinearLayout.LayoutParams(0, dp(62), 1f))
+        bottomNavBarRow.addView(makeNavSlot(Tab.LEDGER, "📒", "明細"), LinearLayout.LayoutParams(0, dp(62), 1f))
+        bottomNavBarRow.addView(makeNavSlot(Tab.STATS, "🍩", "統計"), LinearLayout.LayoutParams(0, dp(62), 1f))
 
-        // 中央空白佔位，上方疊加凸起「＋ 記一筆」
+        // 中央空白佔位，上方疊加凸起「＋ 記一筆」，並與左右標籤維持同一基準線
         val fabHolder = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER
+            gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
+            setPadding(0, dp(6), 0, dp(8))
             setOnClickListener { openAddTransactionAction() }
         }
-        fabHolder.addView(View(this), LinearLayout.LayoutParams(dp(46), dp(34)))
         fabHolder.addView(TextView(this).apply {
             text = "記一筆"
-            textSize = 10f
+            textSize = 10.5f
             setTypeface(null, Typeface.BOLD)
             setTextColor(UiColors.AMBER_DARK)
             gravity = Gravity.CENTER
         })
-        bar.addView(fabHolder, LinearLayout.LayoutParams(0, dp(62), 1f))
+        bottomNavBarRow.addView(fabHolder, LinearLayout.LayoutParams(0, dp(62), 1f))
 
-        bar.addView(makeNavSlot(Tab.ACCOUNTS, "👛", "帳戶"), LinearLayout.LayoutParams(0, dp(62), 1f))
-        bar.addView(makeNavSlot(Tab.MORE, "⚙️", "更多"), LinearLayout.LayoutParams(0, dp(62), 1f))
+        bottomNavBarRow.addView(makeNavSlot(Tab.ACCOUNTS, "👛", "帳戶"), LinearLayout.LayoutParams(0, dp(62), 1f))
+        bottomNavBarRow.addView(makeNavSlot(Tab.MORE, "⚙️", "更多"), LinearLayout.LayoutParams(0, dp(62), 1f))
 
-        val topBorder = View(this).apply { setBackgroundColor(UiColors.BORDER_WARM) }
+        bottomNavTopBorder = View(this).apply { setBackgroundColor(UiColors.BORDER_WARM) }
+        bottomNavSysDivider = View(this).apply {
+            setBackgroundColor(UiColors.DIVIDER)
+            visibility = View.GONE
+        }
 
-        val fabBtn = TextView(this).apply {
+        bottomNavFabBtn = TextView(this).apply {
             text = "＋"
             textSize = 24f
             setTypeface(null, Typeface.BOLD)
@@ -1218,23 +1277,59 @@ class MainActivity : AppCompatActivity() {
             setOnClickListener { openAddTransactionAction() }
         }
 
-        wrapper.addView(bar, FrameLayout.LayoutParams(
+        wrapper.addView(bottomNavBgView, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            dp(62) + defaultBottomOffset,
+            Gravity.BOTTOM
+        ))
+        wrapper.addView(bottomNavBarRow, FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             dp(62),
             Gravity.BOTTOM
-        ))
-        wrapper.addView(topBorder, FrameLayout.LayoutParams(
+        ).apply { bottomMargin = defaultBottomOffset })
+        wrapper.addView(bottomNavTopBorder, FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             dp(1),
             Gravity.BOTTOM
-        ).apply { bottomMargin = dp(62) })
-        wrapper.addView(fabBtn, FrameLayout.LayoutParams(
+        ).apply { bottomMargin = dp(62) + defaultBottomOffset })
+        wrapper.addView(bottomNavSysDivider, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            dp(1),
+            Gravity.BOTTOM
+        ))
+        wrapper.addView(bottomNavFabBtn, FrameLayout.LayoutParams(
             dp(48),
             dp(48),
             Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-        ).apply { bottomMargin = dp(24) })
+        ).apply { bottomMargin = dp(27) + defaultBottomOffset })
 
         return wrapper
+    }
+
+    private fun applyBottomNavInsets(
+        systemBottom: Int,
+        bottomOffset: Int,
+        leftInset: Int,
+        rightInset: Int
+    ) {
+        bottomNavBgView.layoutParams = (bottomNavBgView.layoutParams as FrameLayout.LayoutParams).apply {
+            height = dp(62) + bottomOffset
+        }
+        bottomNavBarRow.layoutParams = (bottomNavBarRow.layoutParams as FrameLayout.LayoutParams).apply {
+            bottomMargin = bottomOffset
+            leftMargin = leftInset
+            rightMargin = rightInset
+        }
+        bottomNavTopBorder.layoutParams = (bottomNavTopBorder.layoutParams as FrameLayout.LayoutParams).apply {
+            bottomMargin = dp(62) + bottomOffset
+        }
+        bottomNavSysDivider.visibility = if (systemBottom >= dp(28)) View.VISIBLE else View.GONE
+        bottomNavSysDivider.layoutParams = (bottomNavSysDivider.layoutParams as FrameLayout.LayoutParams).apply {
+            bottomMargin = systemBottom
+        }
+        bottomNavFabBtn.layoutParams = (bottomNavFabBtn.layoutParams as FrameLayout.LayoutParams).apply {
+            bottomMargin = dp(27) + bottomOffset
+        }
     }
 
     private fun openAddTransactionAction() {

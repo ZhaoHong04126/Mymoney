@@ -5,6 +5,7 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
+import android.os.Build
 import android.text.Editable
 import android.text.InputFilter
 import android.text.InputType
@@ -17,12 +18,17 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.GridLayout
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.core.graphics.toColorInt
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import com.example.mymoney.R
 import com.example.mymoney.data.LedgerRepository
 import com.example.mymoney.model.Account
@@ -41,14 +47,19 @@ object BottomSheetDialogs {
         val dialog = Dialog(context, R.style.WarmBottomSheetDialog)
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
 
+        val rootOverlay = FrameLayout(context).apply {
+            setOnClickListener { dialog.dismiss() }
+        }
+
         val scrollView = ScrollView(context).apply {
             background = createTopRoundedRect(context, UiColors.BG_SCREEN, 26f)
             isVerticalScrollBarEnabled = false
+            isClickable = true
         }
 
         val container = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(context.dp(15), context.dp(8), context.dp(15), context.dp(18))
+            setPadding(context.dp(15), context.dp(8), context.dp(15), context.dp(24))
         }
 
         // 頂部拖曳橫條指示器
@@ -62,10 +73,48 @@ object BottomSheetDialogs {
         })
 
         scrollView.addView(container)
-        dialog.setContentView(scrollView)
-        dialog.window?.apply {
-            setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-            setGravity(Gravity.BOTTOM)
+        rootOverlay.addView(
+            scrollView,
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT,
+                Gravity.BOTTOM
+            )
+        )
+
+        ViewCompat.setOnApplyWindowInsetsListener(rootOverlay) { view, insets ->
+            val sysBars = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            val gestures = insets.getInsets(WindowInsetsCompat.Type.mandatorySystemGestures())
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val bottomSafe = maxOf(sysBars.bottom, gestures.bottom, ime.bottom)
+
+            view.setPadding(sysBars.left, sysBars.top + context.dp(16), sysBars.right, 0)
+            container.setPadding(
+                context.dp(15),
+                context.dp(8),
+                context.dp(15),
+                bottomSafe + context.dp(20)
+            )
+            insets
+        }
+
+        dialog.setContentView(rootOverlay)
+        dialog.window?.let { win ->
+            WindowCompat.setDecorFitsSystemWindows(win, false)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                win.isNavigationBarContrastEnforced = false
+            }
+            WindowInsetsControllerCompat(win, win.decorView).apply {
+                isAppearanceLightStatusBars = true
+                isAppearanceLightNavigationBars = true
+            }
+            win.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+            win.setGravity(Gravity.BOTTOM)
+        }
+        dialog.setOnShowListener {
+            ViewCompat.requestApplyInsets(rootOverlay)
         }
         return Triple(dialog, container, scrollView)
     }
