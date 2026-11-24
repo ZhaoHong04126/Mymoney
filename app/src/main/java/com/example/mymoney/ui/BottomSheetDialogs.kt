@@ -930,7 +930,7 @@ object BottomSheetDialogs {
         ).apply { bottomMargin = context.dp(10) })
 
         container.addView(makeFieldLabel(context, "帳戶名稱"))
-        val nameInput = makeWarmInput(context, "例如：生活現金、台新銀行、LINE Pay").apply {
+        val nameInput = makeWarmInput(context, "例如：生活現金、郵局帳戶、LINE Pay").apply {
             setText(editingAccount?.name.orEmpty())
         }
         container.addView(nameInput, LinearLayout.LayoutParams(
@@ -1605,11 +1605,12 @@ object BottomSheetDialogs {
         }
 
         resetDefaultBtn.setOnClickListener {
+            val defaultTotal = AppDefaults.defaultExpenseCategories().size + AppDefaults.defaultIncomeCategories().size
             showWarmConfirmDialog(
                 context = context,
                 icon = "🏷️",
                 title = "確定還原預設分類？",
-                message = "這會將支出與收入分類還原為系統預設的 15 種常用分類，確定要還原嗎？",
+                message = "這會將支出與收入分類還原為系統預設的 $defaultTotal 種常用分類，確定要還原嗎？",
                 confirmText = "確定還原",
                 cancelText = "取消"
             ) {
