@@ -67,7 +67,7 @@
 | **資料儲存** | 本機 `SharedPreferences` + 原生 `org.json` 結構化持久化（完全離線） |
 | **最低支援系統** | Android 8.0 (API Level 26) |
 | **目標 / 編譯 SDK** | API Level 37 (`compileSdk = 37`, `targetSdk = 37`) |
-| **建置工具** | Gradle `9.3.1` / Android Gradle Plugin `9.1.0` |
+| **建置工具** | Gradle `9.6.0` / Android Gradle Plugin `9.5.2` |
 | **Java 版本** | JDK 17 |
 | **核心依賴** | AndroidX Core KTX、AppCompat、Activity KTX、Fragment KTX、Lifecycle |
 
@@ -105,7 +105,7 @@ Mymoney/
 ## 🚀 快速開始
 
 ### 環境需求
-- **Android Studio**（建議使用支援 AGP 9.1 / SDK 37 之最新版本）
+- **Android Studio**（建議使用支援 AGP 9.5 / SDK 37 之最新版本）
 - **JDK 17** 以上版本
 - **Android SDK Platform 37**
 
