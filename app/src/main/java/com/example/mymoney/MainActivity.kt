@@ -85,13 +85,13 @@ class MainActivity : AppCompatActivity() {
     private lateinit var lockedDescTv: TextView
     private lateinit var unlockMonthBtn: TextView
 
-    // 底部導覽與吐司
+    // 底部導覽、明細頁右下角記帳按鈕與吐司
     private val navTabs = mutableMapOf<Tab, Pair<TextView, TextView>>()
     private lateinit var bottomNavBgView: View
     private lateinit var bottomNavBarRow: LinearLayout
     private lateinit var bottomNavTopBorder: View
     private lateinit var bottomNavSysDivider: View
-    private lateinit var bottomNavFabBtn: TextView
+    private lateinit var ledgerFabBtn: TextView
     private lateinit var toastTv: TextView
     private val toastHandler = Handler(Looper.getMainLooper())
     private var toastHideRunnable: Runnable? = null
@@ -236,11 +236,20 @@ class MainActivity : AppCompatActivity() {
         mainScrollView.addView(scrollInner)
 
         monthLockedOverlay = buildMonthLockedOverlay()
+        ledgerFabBtn = buildLedgerFabButton()
 
         contentHost.addView(mainScrollView, FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
         ))
+        contentHost.addView(ledgerFabBtn, FrameLayout.LayoutParams(
+            dp(54),
+            dp(54),
+            Gravity.BOTTOM or Gravity.END
+        ).apply {
+            marginEnd = dp(16)
+            bottomMargin = dp(16)
+        })
         contentHost.addView(monthLockedOverlay, FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
@@ -252,7 +261,7 @@ class MainActivity : AppCompatActivity() {
             1f
         ))
 
-        // 3. 底部導覽列 (5 格 + 中央凸起「＋ 記一筆」按鈕)
+        // 3. 底部導覽列 (4 格分頁：明細、統計、帳戶、更多)
         rootColumn.addView(buildBottomNavBar())
 
         rootFrame.addView(rootColumn, FrameLayout.LayoutParams(
@@ -300,8 +309,13 @@ class MainActivity : AppCompatActivity() {
             )
             applyBottomNavInsets(systemBottom, bottomOffset, sysBars.left, sysBars.right)
 
+            ledgerFabBtn.layoutParams = (ledgerFabBtn.layoutParams as FrameLayout.LayoutParams).apply {
+                marginEnd = dp(16) + sysBars.right
+                bottomMargin = dp(16)
+            }
+
             toastTv.layoutParams = (toastTv.layoutParams as FrameLayout.LayoutParams).apply {
-                bottomMargin = bottomOffset + dp(82)
+                bottomMargin = bottomOffset + dp(74)
             }
             insets
         }
@@ -497,7 +511,10 @@ class MainActivity : AppCompatActivity() {
     // TAB 1: 首頁明細
     // =========================================================================
     private fun buildLedgerPage(): LinearLayout {
-        val page = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
+        val page = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(0, 0, 0, dp(58))
+        }
 
         // 1. 本月收支總覽卡片
         val heroCard = LinearLayout(this).apply {
@@ -1227,14 +1244,32 @@ class MainActivity : AppCompatActivity() {
     }
 
     // =========================================================================
-    // 底部導覽列
+    // 明細頁右下角懸浮「＋」記帳按鈕 & 底部導覽列
     // =========================================================================
+    private fun buildLedgerFabButton(): TextView {
+        return TextView(this).apply {
+            text = "＋"
+            contentDescription = "記一筆"
+            textSize = 26f
+            setTypeface(null, Typeface.BOLD)
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            background = createGradientRect(
+                this@MainActivity,
+                "#F6B94D".toColorInt(),
+                "#EA901A".toColorInt(),
+                18f,
+                UiColors.BG_CARD,
+                2f
+            )
+            elevation = dpF(8f)
+            setOnClickListener { openAddTransactionAction() }
+        }
+    }
+
     private fun buildBottomNavBar(): FrameLayout {
         val defaultBottomOffset = dp(12)
-        val wrapper = FrameLayout(this).apply {
-            clipChildren = false
-            clipToPadding = false
-        }
+        val wrapper = FrameLayout(this)
 
         bottomNavBgView = View(this).apply {
             setBackgroundColor(UiColors.BG_CARD)
@@ -1275,23 +1310,6 @@ class MainActivity : AppCompatActivity() {
 
         bottomNavBarRow.addView(makeNavSlot(Tab.LEDGER, "📒", "明細"), LinearLayout.LayoutParams(0, dp(62), 1f))
         bottomNavBarRow.addView(makeNavSlot(Tab.STATS, "🍩", "統計"), LinearLayout.LayoutParams(0, dp(62), 1f))
-
-        // 中央空白佔位，上方疊加凸起「＋ 記一筆」，並與左右標籤維持同一基準線
-        val fabHolder = LinearLayout(this).apply {
-            orientation = LinearLayout.VERTICAL
-            gravity = Gravity.CENTER_HORIZONTAL or Gravity.BOTTOM
-            setPadding(0, dp(6), 0, dp(8))
-            setOnClickListener { openAddTransactionAction() }
-        }
-        fabHolder.addView(TextView(this).apply {
-            text = "記一筆"
-            textSize = 10.5f
-            setTypeface(null, Typeface.BOLD)
-            setTextColor(UiColors.AMBER_DARK)
-            gravity = Gravity.CENTER
-        })
-        bottomNavBarRow.addView(fabHolder, LinearLayout.LayoutParams(0, dp(62), 1f))
-
         bottomNavBarRow.addView(makeNavSlot(Tab.ACCOUNTS, "👛", "帳戶"), LinearLayout.LayoutParams(0, dp(62), 1f))
         bottomNavBarRow.addView(makeNavSlot(Tab.MORE, "⚙️", "更多"), LinearLayout.LayoutParams(0, dp(62), 1f))
 
@@ -1299,24 +1317,6 @@ class MainActivity : AppCompatActivity() {
         bottomNavSysDivider = View(this).apply {
             setBackgroundColor(UiColors.DIVIDER)
             visibility = View.GONE
-        }
-
-        bottomNavFabBtn = TextView(this).apply {
-            text = "＋"
-            textSize = 24f
-            setTypeface(null, Typeface.BOLD)
-            setTextColor(Color.WHITE)
-            gravity = Gravity.CENTER
-            background = createGradientRect(
-                this@MainActivity,
-                "#F6B94D".toColorInt(),
-                "#EA901A".toColorInt(),
-                16f,
-                UiColors.BG_CARD,
-                3f
-            )
-            elevation = dpF(8f)
-            setOnClickListener { openAddTransactionAction() }
         }
 
         wrapper.addView(bottomNavBgView, FrameLayout.LayoutParams(
@@ -1339,11 +1339,6 @@ class MainActivity : AppCompatActivity() {
             dp(1),
             Gravity.BOTTOM
         ))
-        wrapper.addView(bottomNavFabBtn, FrameLayout.LayoutParams(
-            dp(48),
-            dp(48),
-            Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
-        ).apply { bottomMargin = dp(27) + defaultBottomOffset })
 
         return wrapper
     }
@@ -1368,9 +1363,6 @@ class MainActivity : AppCompatActivity() {
         bottomNavSysDivider.visibility = if (systemBottom >= dp(28)) View.VISIBLE else View.GONE
         bottomNavSysDivider.layoutParams = (bottomNavSysDivider.layoutParams as FrameLayout.LayoutParams).apply {
             bottomMargin = systemBottom
-        }
-        bottomNavFabBtn.layoutParams = (bottomNavFabBtn.layoutParams as FrameLayout.LayoutParams).apply {
-            bottomMargin = dp(27) + bottomOffset
         }
     }
 
@@ -1435,6 +1427,7 @@ class MainActivity : AppCompatActivity() {
             currentYearMonth.year,
             currentYearMonth.monthValue
         )
+        ledgerFabBtn.visibility = if (activeTab == Tab.LEDGER && !locked) View.VISIBLE else View.GONE
 
         navTabs.forEach { (tab, pair) ->
             val active = tab == activeTab
@@ -1623,7 +1616,7 @@ class MainActivity : AppCompatActivity() {
 
         ledgerListContainer.removeAllViews()
         if (filtered.isEmpty()) {
-            ledgerListContainer.addView(buildEmptyCard("🍯", "這個月份還沒有符合的帳目喔", "點擊下方中央的「＋記一筆」開始記錄溫暖生活吧！"))
+            ledgerListContainer.addView(buildEmptyCard("🍯", "這個月份還沒有符合的帳目喔", "點擊右下角的「＋」按鈕開始記錄溫暖生活吧！"))
             return
         }
 

@@ -12,7 +12,7 @@ android {
         //noinspection EditedTargetSdkVersion
         targetSdk = 37
         versionCode = 1
-        versionName = "1.1.0"
+        versionName = "1.2.0"
     }
 
     buildTypes {
