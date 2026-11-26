@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "6a0bc60c-1af8-49be-a9e0-477c82e96d06",
+  "status": "current",
+  "command": "deliver",
+  "type": "explainer",
+  "input": "d:\\GitHub\\Mymoney\\.archify\\explainer-mymoney-architecture-health-20261126-1112\\candidate.archify.md",
+  "output": "D:\\Github\\Mymoney\\.archify\\explainer-mymoney-architecture-health-20261126-1112\\mymoney-architecture-health.html",
+  "specification": {
+    "sha256": "f1cd7b40723463443da9df726d36045da951a07a479965c2cad9f0877d170598",
+    "bytes": 8697
+  },
+  "artifact": {
+    "sha256": "8f0860c55333ba951681906670970c94fc683465a5d9568ae52fcd9b825c9cb8",
+    "bytes": 1384529
+  },
+  "explainer": {
+    "preparedSha256": "f7e3d8c051ad1410d6016c9565f8a3f5ef31d118b4438539179508c9097a3358",
+    "dependencies": [
+      {
+        "kind": "repository",
+        "id": "delete-acc",
+        "path": "app/src/main/java/com/example/mymoney/ui/BottomSheetDialogs.kt",
+        "revision": "5b9ed0f1a571756186f8bfca64ae6891b60b4624",
+        "sha256": "33ac604913fb91cc3ef05264ef94328ecf802662ec4d1987e8869932e7911008",
+        "bytes": 76516
+      },
+      {
+        "kind": "repository",
+        "id": "balance-calc",
+        "path": "app/src/main/java/com/example/mymoney/data/LedgerRepository.kt",
+        "revision": "5b9ed0f1a571756186f8bfca64ae6891b60b4624",
+        "sha256": "f33fb4c3617d15507410f68299e6909965e2cf3d21a3a44407753056bca612fc",
+        "bytes": 18314
+      },
+      {
+        "kind": "repository",
+        "id": "repo-main",
+        "path": "app/src/main/java/com/example/mymoney/MainActivity.kt",
+        "revision": "5b9ed0f1a571756186f8bfca64ae6891b60b4624",
+        "sha256": "7cbf236494f7babadc241de3d34d5afd7c5a545d876eca69d81164af0c28c9a9",
+        "bytes": 91933
+      },
+      {
+        "kind": "repository",
+        "id": "render-all",
+        "path": "app/src/main/java/com/example/mymoney/MainActivity.kt",
+        "revision": "5b9ed0f1a571756186f8bfca64ae6891b60b4624",
+        "sha256": "7cbf236494f7babadc241de3d34d5afd7c5a545d876eca69d81164af0c28c9a9",
+        "bytes": 91933
+      },
+      {
+        "kind": "repository",
+        "id": "acc-tab",
+        "path": "app/src/main/java/com/example/mymoney/MainActivity.kt",
+        "revision": "5b9ed0f1a571756186f8bfca64ae6891b60b4624",
+        "sha256": "7cbf236494f7babadc241de3d34d5afd7c5a545d876eca69d81164af0c28c9a9",
+        "bytes": 91933
+      },
+      {
+        "kind": "repository",
+        "id": "sheet-tx",
+        "path": "app/src/main/java/com/example/mymoney/ui/BottomSheetDialogs.kt",
+        "revision": "5b9ed0f1a571756186f8bfca64ae6891b60b4624",
+        "sha256": "33ac604913fb91cc3ef05264ef94328ecf802662ec4d1987e8869932e7911008",
+        "bytes": 76516
+      },
+      {
+        "kind": "repository",
+        "id": "widgets-ui",
+        "path": "app/src/main/java/com/example/mymoney/ui/DonutChartView.kt",
+        "revision": "5b9ed0f1a571756186f8bfca64ae6891b60b4624",
+        "sha256": "9e61e18dcc6ab2c599e5d0aa3239f20acd2b218429ebad561afb2890dd3db5ea",
+        "bytes": 4019
+      },
+      {
+        "kind": "repository",
+        "id": "calc-expr",
+        "path": "app/src/main/java/com/example/mymoney/ui/UiHelpers.kt",
+        "revision": "5b9ed0f1a571756186f8bfca64ae6891b60b4624",
+        "sha256": "26efc63ffb4b178b3a9a77f187aef5a117608e16b29b14bfb74f3198a8846e12",
+        "bytes": 13526
+      },
+      {
+        "kind": "repository",
+        "id": "models-data",
+        "path": "app/src/main/java/com/example/mymoney/model/Models.kt",
+        "revision": "5b9ed0f1a571756186f8bfca64ae6891b60b4624",
+        "sha256": "392d095b25d2f6d91fddf65ca89abe9009506c29d019d7624faa4f81bc2fb72c",
+        "bytes": 4887
+      },
+      {
+        "kind": "diagram-spec",
+        "id": "module-map",
+        "inline": true,
+        "sha256": "8c48082d101b39a0352fe9f0dbfde0181de03d9e03540fe6e4ed6c01c72a1916",
+        "bytes": 1988
+      },
+      {
+        "kind": "diagram-spec",
+        "id": "refactor-plan",
+        "inline": true,
+        "sha256": "7521ba493d52acc95c19f822a731bb1688b11721ff9ab4f83f59f44d41847640",
+        "bytes": 1346
+      }
+    ]
+  }
+}

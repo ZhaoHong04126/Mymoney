@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "ok": true,
+  "command": "finalize",
+  "status": "pass",
+  "type": "explainer",
+  "quality": "showcase",
+  "specification": {
+    "path": "d:\\GitHub\\Mymoney\\.archify\\explainer-mymoney-architecture-health-20261126-1112\\candidate.archify.md",
+    "sha256": "f1cd7b40723463443da9df726d36045da951a07a479965c2cad9f0877d170598",
+    "bytes": 8697
+  },
+  "artifact": {
+    "path": "d:\\GitHub\\Mymoney\\.archify\\explainer-mymoney-architecture-health-20261126-1112\\mymoney-architecture-health.html",
+    "sha256": "8f0860c55333ba951681906670970c94fc683465a5d9568ae52fcd9b825c9cb8",
+    "bytes": 1384529
+  },
+  "gates": {
+    "validate": "pass",
+    "deliver": "pass",
+    "check": "pass",
+    "browser-check": "not-run"
+  },
+  "diagnostics": [],
+  "diagnosticSummary": {
+    "total": 0,
+    "shown": 0,
+    "truncated": false
+  },
+  "evidence": {
+    "receipt": "D:\\Github\\Mymoney\\.archify\\explainer-mymoney-architecture-health-20261126-1112\\mymoney-architecture-health.finalize.json",
+    "summaryReceipt": "D:\\Github\\Mymoney\\.archify\\explainer-mymoney-architecture-health-20261126-1112\\mymoney-architecture-health.finalize-summary.json"
+  },
+  "update": {
+    "status": "current",
+    "installedVersion": "3.3.1",
+    "availableVersion": "3.3.1",
+    "releaseNotes": null,
+    "checkedAt": "2026-11-25T14:56:08.548Z",
+    "source": "cache",
+    "noticeRequired": false,
+    "noticeText": null
+  },
+  "visualReview": "not-requested",
+  "durationMs": 1582,
+  "browserCheck": {
+    "requested": false,
+    "ran": false
+  }
+}
