@@ -6,9 +6,15 @@ import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.util.TypedValue
 import android.view.Gravity
+import android.view.MotionEvent
+import android.view.VelocityTracker
+import android.view.View
+import android.view.ViewConfiguration
 import android.view.ViewGroup
 import android.view.Window
+import android.view.animation.Interpolator
 import android.widget.LinearLayout
+import android.widget.OverScroller
 import android.widget.TextView
 import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
@@ -18,6 +24,8 @@ import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 object UiColors {
@@ -44,7 +52,7 @@ object UiColors {
     val TRANSFER = "#8E6E53".toColorInt()
     val TRANSFER_BG = "#F2EBE3".toColorInt()
 
-    val WARN_BG = "#FFF1D6".toColorInt()
+    val WARN_BG = "#EBFFFDF8".toColorInt()
     val WARN_TEXT = "#C87609".toColorInt()
     val BANNER_BG = "#FFF9EB".toColorInt()
     val BANNER_BORDER = "#F4D89E".toColorInt()
@@ -301,6 +309,320 @@ class WrapLayout(context: Context) : ViewGroup(context) {
             x += cw + horizontalGapPx
             rowHeight = max(rowHeight, ch)
         }
+    }
+}
+
+/**
+ * 雙頁／多頁等高水平滑動容器 (支援手指拖曳、慣性滑動、邊界回彈與外部 ScrollView 防衝突)
+ */
+class HorizontalCardPager(context: Context) : ViewGroup(context) {
+
+    var currentPage: Int = 0
+        private set
+
+    var onScrollProgress: ((Float) -> Unit)? = null
+
+    private val smoothInterpolator = Interpolator { t ->
+        val f = t - 1f
+        f * f * f * f * f + 1f
+    }
+    private val scroller = OverScroller(context, smoothInterpolator)
+    private val viewConfig = ViewConfiguration.get(context)
+    private val touchSlop = viewConfig.scaledTouchSlop
+    private val minFlingVelocity = max(viewConfig.scaledMinimumFlingVelocity * 3, context.dp(240))
+    private val maxFlingVelocity = viewConfig.scaledMaximumFlingVelocity
+
+    private var velocityTracker: VelocityTracker? = null
+    private var initialX = 0f
+    private var initialY = 0f
+    private var lastX = 0f
+    private var isDragging = false
+    private var disallowReleasedForVertical = false
+
+    init {
+        clipChildren = true
+        clipToPadding = true
+    }
+
+    private fun visiblePages(): List<View> {
+        val list = ArrayList<View>(childCount)
+        for (i in 0..<childCount) {
+            val c = getChildAt(i)
+            if (!c.isGone) list.add(c)
+        }
+        return list
+    }
+
+    private fun pageWidth(): Int = max(0, width - paddingLeft - paddingRight)
+
+    fun setCurrentPage(page: Int, smooth: Boolean = true) {
+        val pages = visiblePages()
+        if (pages.isEmpty()) return
+        val clamped = page.coerceIn(0, pages.lastIndex)
+        currentPage = clamped
+
+        val pw = pageWidth()
+        if (pw <= 0) {
+            dispatchProgress(clamped.toFloat())
+            return
+        }
+
+        val targetX = clamped * pw
+        val dx = targetX - scrollX
+        if (!smooth || dx == 0) {
+            if (!scroller.isFinished) scroller.abortAnimation()
+            scrollTo(targetX, 0)
+            dispatchProgress(clamped.toFloat())
+        } else {
+            val distanceRatio = min(1f, abs(dx).toFloat() / pw.toFloat())
+            val duration = (220 + (140 * distanceRatio).roundToInt()).coerceIn(200, 360)
+            scroller.startScroll(scrollX, 0, dx, 0, duration)
+            postInvalidateOnAnimation()
+        }
+    }
+
+    private fun dispatchProgress(overrideProgress: Float? = null) {
+        val pages = visiblePages()
+        if (pages.size <= 1) {
+            onScrollProgress?.invoke(0f)
+            return
+        }
+        val pw = pageWidth()
+        val p = overrideProgress ?: if (pw > 0) {
+            (scrollX.toFloat() / pw.toFloat()).coerceIn(0f, pages.lastIndex.toFloat())
+        } else {
+            currentPage.toFloat()
+        }
+        onScrollProgress?.invoke(p)
+    }
+
+    override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+        val totalWidth = MeasureSpec.getSize(widthMeasureSpec)
+        val pw = max(0, totalWidth - paddingLeft - paddingRight)
+        val childWidthSpec = MeasureSpec.makeMeasureSpec(pw, MeasureSpec.EXACTLY)
+        val unconstrainedHeightSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+
+        val pages = visiblePages()
+        var maxChildHeight = 0
+        for (child in pages) {
+            child.measure(childWidthSpec, unconstrainedHeightSpec)
+            maxChildHeight = max(maxChildHeight, child.measuredHeight)
+        }
+
+        val exactHeightSpec = MeasureSpec.makeMeasureSpec(maxChildHeight, MeasureSpec.EXACTLY)
+        for (child in pages) {
+            child.measure(childWidthSpec, exactHeightSpec)
+        }
+
+        val resolvedW = resolveSize(pw + paddingLeft + paddingRight, widthMeasureSpec)
+        val resolvedH = resolveSize(maxChildHeight + paddingTop + paddingBottom, heightMeasureSpec)
+        setMeasuredDimension(resolvedW, resolvedH)
+    }
+
+    override fun onLayout(changed: Boolean, l: Int, t: Int, r: Int, b: Int) {
+        val pw = max(0, (r - l) - paddingLeft - paddingRight)
+        val ph = max(0, (b - t) - paddingTop - paddingBottom)
+        val pages = visiblePages()
+
+        pages.forEachIndexed { index, child ->
+            val left = paddingLeft + index * pw
+            child.layout(left, paddingTop, left + pw, paddingTop + ph)
+        }
+
+        if (pages.isNotEmpty()) {
+            currentPage = currentPage.coerceIn(0, pages.lastIndex)
+            if (scroller.isFinished && !isDragging && pw > 0) {
+                val expectedX = currentPage * pw
+                if (scrollX != expectedX) {
+                    scrollTo(expectedX, 0)
+                }
+                dispatchProgress()
+            }
+        }
+    }
+
+    override fun computeScroll() {
+        if (scroller.computeScrollOffset()) {
+            scrollTo(scroller.currX, scroller.currY)
+            dispatchProgress()
+            postInvalidateOnAnimation()
+        }
+    }
+
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
+        if (visiblePages().size > 1) {
+            when (ev.actionMasked) {
+                MotionEvent.ACTION_DOWN -> {
+                    disallowReleasedForVertical = false
+                    parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (!isDragging && !disallowReleasedForVertical) {
+                        val dx = abs(ev.x - initialX)
+                        val dy = abs(ev.y - initialY)
+                        if (dy > touchSlop && dy > dx * 1.15f) {
+                            disallowReleasedForVertical = true
+                            parent?.requestDisallowInterceptTouchEvent(false)
+                        }
+                    }
+                }
+            }
+        }
+        return super.dispatchTouchEvent(ev)
+    }
+
+    override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
+        val pages = visiblePages()
+        if (pages.size <= 1) return false
+
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                initialX = ev.x
+                initialY = ev.y
+                lastX = ev.x
+                obtainOrResetVelocityTracker().addMovement(ev)
+
+                if (!scroller.isFinished) {
+                    val remaining = abs(scroller.finalX - scroller.currX)
+                    scroller.abortAnimation()
+                    if (remaining > context.dp(4)) {
+                        isDragging = true
+                        parent?.requestDisallowInterceptTouchEvent(true)
+                    } else {
+                        isDragging = false
+                        scrollTo(currentPage * pageWidth(), 0)
+                        dispatchProgress()
+                    }
+                } else {
+                    isDragging = false
+                }
+                return isDragging
+            }
+            MotionEvent.ACTION_MOVE -> {
+                if (disallowReleasedForVertical) return false
+                if (isDragging) return true
+
+                val dx = abs(ev.x - initialX)
+                val dy = abs(ev.y - initialY)
+                if (dx > touchSlop && dx >= dy) {
+                    isDragging = true
+                    lastX = ev.x
+                    obtainVelocityTracker().addMovement(ev)
+                    parent?.requestDisallowInterceptTouchEvent(true)
+                    return true
+                }
+            }
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
+                isDragging = false
+                recycleVelocityTracker()
+            }
+        }
+        return false
+    }
+
+    override fun onTouchEvent(ev: MotionEvent): Boolean {
+        val pages = visiblePages()
+        if (pages.size <= 1) return super.onTouchEvent(ev)
+
+        obtainVelocityTracker().addMovement(ev)
+
+        when (ev.actionMasked) {
+            MotionEvent.ACTION_DOWN -> {
+                initialX = ev.x
+                initialY = ev.y
+                lastX = ev.x
+                if (!scroller.isFinished) {
+                    scroller.abortAnimation()
+                }
+                return true
+            }
+            MotionEvent.ACTION_MOVE -> {
+                val dxTotal = abs(ev.x - initialX)
+                val dyTotal = abs(ev.y - initialY)
+                if (!isDragging && !disallowReleasedForVertical && dxTotal > touchSlop && dxTotal >= dyTotal) {
+                    isDragging = true
+                    lastX = ev.x
+                    parent?.requestDisallowInterceptTouchEvent(true)
+                }
+                if (isDragging) {
+                    val deltaX = lastX - ev.x
+                    lastX = ev.x
+                    val pw = pageWidth()
+                    val maxScroll = max(0, (pages.size - 1) * pw).toFloat()
+                    val curX = scrollX.toFloat()
+                    val factor = if ((curX <= 0f && deltaX < 0f) || (curX >= maxScroll && deltaX > 0f)) {
+                        0.24f
+                    } else {
+                        1f
+                    }
+                    val maxOverscroll = context.dpF(22f)
+                    val nextX = (curX + deltaX * factor).coerceIn(-maxOverscroll, maxScroll + maxOverscroll)
+                    scrollTo(nextX.roundToInt(), 0)
+                    dispatchProgress()
+                }
+                return true
+            }
+            MotionEvent.ACTION_UP -> {
+                val pw = pageWidth()
+                var targetPage = currentPage
+                if (pw > 0 && isDragging) {
+                    val vt = obtainVelocityTracker()
+                    vt.computeCurrentVelocity(1000, maxFlingVelocity.toFloat())
+                    val vx = vt.xVelocity
+                    val totalDx = ev.x - initialX
+                    val dragOffset = scrollX - currentPage * pw
+
+                    targetPage = when {
+                        vx < -minFlingVelocity && totalDx < -context.dp(12) ->
+                            (currentPage + 1).coerceAtMost(pages.lastIndex)
+                        vx > minFlingVelocity && totalDx > context.dp(12) ->
+                            (currentPage - 1).coerceAtLeast(0)
+                        dragOffset > pw * 0.20f ->
+                            (currentPage + 1).coerceAtMost(pages.lastIndex)
+                        dragOffset < -pw * 0.20f ->
+                            (currentPage - 1).coerceAtLeast(0)
+                        else -> currentPage
+                    }
+                } else if (!isDragging && abs(ev.x - initialX) < touchSlop && abs(ev.y - initialY) < touchSlop) {
+                    performClick()
+                }
+                isDragging = false
+                recycleVelocityTracker()
+                setCurrentPage(targetPage, smooth = true)
+                return true
+            }
+            MotionEvent.ACTION_CANCEL -> {
+                isDragging = false
+                recycleVelocityTracker()
+                setCurrentPage(currentPage, smooth = true)
+                return true
+            }
+        }
+        return true
+    }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
+
+    private fun obtainOrResetVelocityTracker(): VelocityTracker {
+        val vt = velocityTracker
+        return if (vt == null) {
+            VelocityTracker.obtain().also { velocityTracker = it }
+        } else {
+            vt.clear()
+            vt
+        }
+    }
+
+    private fun obtainVelocityTracker(): VelocityTracker {
+        return velocityTracker ?: VelocityTracker.obtain().also { velocityTracker = it }
+    }
+
+    private fun recycleVelocityTracker() {
+        velocityTracker?.recycle()
+        velocityTracker = null
     }
 }
 

@@ -5,6 +5,7 @@ import android.graphics.Color
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.Typeface
+import android.graphics.drawable.GradientDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -26,6 +27,7 @@ import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.toColorInt
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
@@ -39,6 +41,7 @@ import com.example.mymoney.model.TxType
 import com.example.mymoney.ui.BottomSheetDialogs
 import com.example.mymoney.ui.DonutChartView
 import com.example.mymoney.ui.DonutSlice
+import com.example.mymoney.ui.HorizontalCardPager
 import com.example.mymoney.ui.UiColors
 import com.example.mymoney.ui.createCircleDrawable
 import com.example.mymoney.ui.createGradientRect
@@ -97,6 +100,11 @@ class MainActivity : AppCompatActivity() {
     private var toastHideRunnable: Runnable? = null
 
     // 首頁明細視圖元件
+    private lateinit var overviewBudgetPager: HorizontalCardPager
+    private lateinit var pagerDot0View: View
+    private lateinit var pagerDot1View: View
+    private lateinit var pagerDot0Drawable: GradientDrawable
+    private lateinit var pagerDot1Drawable: GradientDrawable
     private lateinit var monthExpenseTv: TextView
     private lateinit var monthNetBalanceTv: TextView
     private lateinit var monthIncomeTv: TextView
@@ -516,8 +524,8 @@ class MainActivity : AppCompatActivity() {
             setPadding(0, 0, 0, dp(58))
         }
 
-        // 1. 本月收支總覽卡片
-        val heroCard = LinearLayout(this).apply {
+        // 1. 一體式左右滑動儀表板卡片 (第 1 頁：本月收支總覽 ／ 第 2 頁：本月預算進度)
+        val heroUnifiedCard = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             background = createGradientRect(
                 this@MainActivity,
@@ -527,7 +535,17 @@ class MainActivity : AppCompatActivity() {
                 UiColors.HERO_BORDER,
                 1f
             )
-            setPadding(dp(16), dp(15), dp(16), dp(14))
+            clipToOutline = true
+            setPadding(0, dp(14), 0, dp(10))
+        }
+
+        overviewBudgetPager = HorizontalCardPager(this)
+
+        // --- Slide 0: 本月收支總覽 ---
+        val overviewSlide = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(1), dp(16), dp(2))
         }
 
         val heroTop = LinearLayout(this).apply {
@@ -576,12 +594,12 @@ class MainActivity : AppCompatActivity() {
         }
         heroTop.addView(heroLeft, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         heroTop.addView(balancePill)
-        heroCard.addView(heroTop, LinearLayout.LayoutParams(
+        overviewSlide.addView(heroTop, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { bottomMargin = dp(10) })
 
-        heroCard.addView(View(this).apply {
+        overviewSlide.addView(View(this).apply {
             setBackgroundColor("#4DBA9256".toColorInt())
         }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(1)).apply {
             bottomMargin = dp(10)
@@ -636,18 +654,13 @@ class MainActivity : AppCompatActivity() {
             marginEnd = dp(8)
         })
         heroSub.addView(subRight, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-        heroCard.addView(heroSub)
+        overviewSlide.addView(heroSub)
 
-        page.addView(heroCard, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = dp(12) })
-
-        // 2. 月度預算進度卡片
-        val budgetCard = LinearLayout(this).apply {
+        // --- Slide 1: 本月預算進度 ---
+        val budgetSlide = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            background = createRoundedRect(this@MainActivity, UiColors.BG_CARD, 20f, UiColors.BORDER_WARM, 1f)
-            setPadding(dp(14), dp(13), dp(14), dp(13))
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(dp(16), dp(2), dp(16), dp(2))
         }
         val budgetHead = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -671,10 +684,17 @@ class MainActivity : AppCompatActivity() {
         budgetHead.addView(View(this), LinearLayout.LayoutParams(0, 1, 1f))
         budgetHead.addView(TextView(this).apply {
             text = "設定預算 ✎"
-            textSize = 12f
+            textSize = 11.5f
             setTypeface(null, Typeface.BOLD)
-            setTextColor(UiColors.AMBER_DARK)
-            setPadding(dp(6), dp(2), dp(4), dp(2))
+            setTextColor(UiColors.AMBER_TEXT_DARK)
+            background = createRoundedRect(
+                this@MainActivity,
+                "#C7FFFDF8".toColorInt(),
+                99f,
+                "#B3EBC686".toColorInt(),
+                1f
+            )
+            setPadding(dp(9), dp(4), dp(9), dp(4))
             setOnClickListener {
                 BottomSheetDialogs.showBudgetSheet(
                     context = this@MainActivity,
@@ -684,38 +704,89 @@ class MainActivity : AppCompatActivity() {
                 )
             }
         })
-        budgetCard.addView(budgetHead, LinearLayout.LayoutParams(
+        budgetSlide.addView(budgetHead, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
-        ).apply { bottomMargin = dp(9) })
+        ).apply { bottomMargin = dp(12) })
 
         val track = FrameLayout(this).apply {
-            background = createRoundedRect(this@MainActivity, UiColors.BG_INPUT, 99f)
+            background = createRoundedRect(
+                this@MainActivity,
+                "#D9FFFDF8".toColorInt(),
+                99f,
+                "#59BA9256".toColorInt(),
+                1f
+            )
+            clipToOutline = true
         }
         budgetProgressFill = View(this)
-        track.addView(budgetProgressFill, FrameLayout.LayoutParams(0, dp(10)))
-        budgetCard.addView(track, LinearLayout.LayoutParams(
+        track.addView(budgetProgressFill, FrameLayout.LayoutParams(0, dp(11)))
+        budgetSlide.addView(track, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
-            dp(10)
-        ).apply { bottomMargin = dp(7) })
+            dp(11)
+        ).apply { bottomMargin = dp(10) })
 
         val budgetMeta = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL }
         budgetUsedTv = TextView(this).apply {
-            textSize = 11.5f
+            textSize = 12f
             setTypeface(null, Typeface.BOLD)
-            setTextColor(UiColors.TEXT_SECONDARY)
+            setTextColor("#7D6242".toColorInt())
         }
         budgetRemainTv = TextView(this).apply {
-            textSize = 11.5f
+            textSize = 12f
             setTypeface(null, Typeface.BOLD)
-            setTextColor(UiColors.TEXT_SECONDARY)
+            setTextColor(UiColors.TEXT_MAIN)
             gravity = Gravity.END
         }
         budgetMeta.addView(budgetUsedTv, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         budgetMeta.addView(budgetRemainTv, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
-        budgetCard.addView(budgetMeta)
+        budgetSlide.addView(budgetMeta)
 
-        page.addView(budgetCard, LinearLayout.LayoutParams(
+        overviewBudgetPager.addView(overviewSlide)
+        overviewBudgetPager.addView(budgetSlide)
+        heroUnifiedCard.addView(overviewBudgetPager, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ))
+
+        // --- 底部左右滑動互動指示點 (可滑動亦可直接點選切換) ---
+        val indicatorRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER
+            setPadding(dp(8), dp(6), dp(8), dp(2))
+        }
+        pagerDot0Drawable = createRoundedRect(this, UiColors.AMBER_DARK, 99f)
+        pagerDot1Drawable = createRoundedRect(this, "#4D84633B".toColorInt(), 99f)
+
+        val dot0TouchWrap = FrameLayout(this).apply {
+            contentDescription = "本月收支總覽"
+            setPadding(dp(4), dp(3), dp(4), dp(3))
+            setOnClickListener { overviewBudgetPager.setCurrentPage(0, smooth = true) }
+        }
+        pagerDot0View = View(this).apply { background = pagerDot0Drawable }
+        dot0TouchWrap.addView(pagerDot0View, FrameLayout.LayoutParams(dp(18), dp(5), Gravity.CENTER))
+
+        val dot1TouchWrap = FrameLayout(this).apply {
+            contentDescription = "本月預算進度"
+            setPadding(dp(4), dp(3), dp(4), dp(3))
+            setOnClickListener { overviewBudgetPager.setCurrentPage(1, smooth = true) }
+        }
+        pagerDot1View = View(this).apply { background = pagerDot1Drawable }
+        dot1TouchWrap.addView(pagerDot1View, FrameLayout.LayoutParams(dp(6), dp(5), Gravity.CENTER))
+
+        indicatorRow.addView(dot0TouchWrap)
+        indicatorRow.addView(dot1TouchWrap)
+        heroUnifiedCard.addView(indicatorRow, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.WRAP_CONTENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply { gravity = Gravity.CENTER_HORIZONTAL })
+
+        overviewBudgetPager.onScrollProgress = { progress ->
+            updateHeroPagerIndicator(progress)
+        }
+        updateHeroPagerIndicator(0f)
+
+        page.addView(heroUnifiedCard, LinearLayout.LayoutParams(
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { bottomMargin = dp(12) })
@@ -1509,6 +1580,29 @@ class MainActivity : AppCompatActivity() {
         suppressAccountSpinnerEvent = false
     }
 
+    private fun updateHeroPagerIndicator(progress: Float) {
+        val t = progress.coerceIn(0f, 1f)
+        val activeColor = UiColors.AMBER_DARK
+        val inactiveColor = "#4D84633B".toColorInt()
+
+        pagerDot0Drawable.setColor(ColorUtils.blendARGB(inactiveColor, activeColor, 1f - t))
+        pagerDot1Drawable.setColor(ColorUtils.blendARGB(inactiveColor, activeColor, t))
+
+        val w0 = dpF(6f + 12f * (1f - t)).roundToInt()
+        val w1 = dpF(6f + 12f * t).roundToInt()
+
+        val lp0 = pagerDot0View.layoutParams
+        if (lp0 != null && lp0.width != w0) {
+            lp0.width = w0
+            pagerDot0View.layoutParams = lp0
+        }
+        val lp1 = pagerDot1View.layoutParams
+        if (lp1 != null && lp1.width != w1) {
+            lp1.width = w1
+            pagerDot1View.layoutParams = lp1
+        }
+    }
+
     private fun renderLedgerTab() {
         val ym = currentYmString()
         val monthTxs = repo.data.transactions.filter { it.date.startsWith(ym) }
@@ -1544,25 +1638,25 @@ class MainActivity : AppCompatActivity() {
             budget <= 0L -> {
                 budgetStatusTagTv.text = "尚未設定預算"
                 budgetStatusTagTv.setTextColor(UiColors.INCOME)
-                budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f)
+                budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f, "#6646937E".toColorInt(), 1f)
                 budgetProgressFill.background = createGradientRect(this, "#F6C36B".toColorInt(), UiColors.AMBER_PRIMARY, 99f)
             }
             rawPct >= 100 -> {
                 budgetStatusTagTv.text = "已超支提醒 🐾"
                 budgetStatusTagTv.setTextColor(UiColors.EXPENSE)
-                budgetStatusTagTv.background = createRoundedRect(this, UiColors.EXPENSE_BG, 99f)
+                budgetStatusTagTv.background = createRoundedRect(this, UiColors.EXPENSE_BG, 99f, UiColors.EXPENSE_BORDER, 1f)
                 budgetProgressFill.background = createGradientRect(this, "#E8836B".toColorInt(), "#D9534F".toColorInt(), 99f)
             }
             rawPct >= 80 -> {
                 budgetStatusTagTv.text = "接近預算上限"
                 budgetStatusTagTv.setTextColor(UiColors.WARN_TEXT)
-                budgetStatusTagTv.background = createRoundedRect(this, UiColors.WARN_BG, 99f)
+                budgetStatusTagTv.background = createRoundedRect(this, UiColors.WARN_BG, 99f, "#CCA86B14".toColorInt(), 1f)
                 budgetProgressFill.background = createGradientRect(this, "#F5B041".toColorInt(), "#E67E22".toColorInt(), 99f)
             }
             else -> {
                 budgetStatusTagTv.text = "安心花費中 ✨"
                 budgetStatusTagTv.setTextColor(UiColors.INCOME)
-                budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f)
+                budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f, "#6646937E".toColorInt(), 1f)
                 budgetProgressFill.background = createGradientRect(this, "#F6C36B".toColorInt(), UiColors.AMBER_PRIMARY, 99f)
             }
         }
