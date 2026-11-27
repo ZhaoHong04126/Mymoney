@@ -94,7 +94,10 @@ class MainActivity : AppCompatActivity() {
     private lateinit var bottomNavBarRow: LinearLayout
     private lateinit var bottomNavTopBorder: View
     private lateinit var bottomNavSysDivider: View
+    private lateinit var fabMenuScrim: View
+    private lateinit var manualInputFabPill: LinearLayout
     private lateinit var ledgerFabBtn: TextView
+    private var isFabMenuExpanded = false
     private lateinit var toastTv: TextView
     private val toastHandler = Handler(Looper.getMainLooper())
     private var toastHideRunnable: Runnable? = null
@@ -184,11 +187,13 @@ class MainActivity : AppCompatActivity() {
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (activeTab != Tab.LEDGER) {
-                    switchTab(Tab.LEDGER)
-                } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
+                when {
+                    isFabMenuExpanded -> setFabMenuExpanded(expanded = false, animate = true)
+                    activeTab != Tab.LEDGER -> switchTab(Tab.LEDGER)
+                    else -> {
+                        isEnabled = false
+                        onBackPressedDispatcher.onBackPressed()
+                    }
                 }
             }
         })
@@ -244,12 +249,32 @@ class MainActivity : AppCompatActivity() {
         mainScrollView.addView(scrollInner)
 
         monthLockedOverlay = buildMonthLockedOverlay()
+        fabMenuScrim = View(this).apply {
+            visibility = View.GONE
+            alpha = 0f
+            setBackgroundColor("#333D3127".toColorInt())
+            isClickable = true
+            setOnClickListener { setFabMenuExpanded(expanded = false, animate = true) }
+        }
+        manualInputFabPill = buildManualInputFabPill()
         ledgerFabBtn = buildLedgerFabButton()
 
         contentHost.addView(mainScrollView, FrameLayout.LayoutParams(
             FrameLayout.LayoutParams.MATCH_PARENT,
             FrameLayout.LayoutParams.MATCH_PARENT
         ))
+        contentHost.addView(fabMenuScrim, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.MATCH_PARENT
+        ))
+        contentHost.addView(manualInputFabPill, FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT,
+            Gravity.BOTTOM or Gravity.END
+        ).apply {
+            marginEnd = dp(16)
+            bottomMargin = dp(80)
+        })
         contentHost.addView(ledgerFabBtn, FrameLayout.LayoutParams(
             dp(54),
             dp(54),
@@ -321,6 +346,10 @@ class MainActivity : AppCompatActivity() {
                 marginEnd = dp(16) + sysBars.right
                 bottomMargin = dp(16)
             }
+            manualInputFabPill.layoutParams = (manualInputFabPill.layoutParams as FrameLayout.LayoutParams).apply {
+                marginEnd = dp(16) + sysBars.right
+                bottomMargin = dp(80)
+            }
 
             toastTv.layoutParams = (toastTv.layoutParams as FrameLayout.LayoutParams).apply {
                 bottomMargin = bottomOffset + dp(74)
@@ -381,6 +410,7 @@ class MainActivity : AppCompatActivity() {
             setTextColor(UiColors.TEXT_SECONDARY)
             gravity = Gravity.CENTER
             setOnClickListener {
+                if (isFabMenuExpanded) setFabMenuExpanded(expanded = false, animate = false)
                 currentYearMonth = currentYearMonth.minusMonths(1)
                 selectedStatCategoryId = null
                 expandedRankCategoryId = null
@@ -393,6 +423,7 @@ class MainActivity : AppCompatActivity() {
             setTextColor(UiColors.TEXT_MAIN)
             setPadding(dp(6), dp(2), dp(6), dp(2))
             setOnClickListener {
+                if (isFabMenuExpanded) setFabMenuExpanded(expanded = false, animate = false)
                 currentYearMonth = YearMonth.now()
                 selectedStatCategoryId = null
                 expandedRankCategoryId = null
@@ -407,6 +438,7 @@ class MainActivity : AppCompatActivity() {
             setTextColor(UiColors.TEXT_SECONDARY)
             gravity = Gravity.CENTER
             setOnClickListener {
+                if (isFabMenuExpanded) setFabMenuExpanded(expanded = false, animate = false)
                 currentYearMonth = currentYearMonth.plusMonths(1)
                 selectedStatCategoryId = null
                 expandedRankCategoryId = null
@@ -1315,12 +1347,48 @@ class MainActivity : AppCompatActivity() {
     }
 
     // =========================================================================
-    // 明細頁右下角懸浮「＋」記帳按鈕 & 底部導覽列
+    // 明細頁右下角懸浮「＋」記帳選單按鈕 & 底部導覽列
     // =========================================================================
+    private fun buildManualInputFabPill(): LinearLayout {
+        return LinearLayout(this).apply {
+            visibility = View.GONE
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            background = createRoundedRect(
+                this@MainActivity,
+                UiColors.BG_CARD,
+                16f,
+                UiColors.HERO_BORDER,
+                1.2f
+            )
+            setPadding(dp(10), dp(8), dp(14), dp(8))
+            elevation = dpF(9f)
+
+            addView(TextView(this@MainActivity).apply {
+                text = "✏️"
+                textSize = 14.5f
+                gravity = Gravity.CENTER
+                background = createRoundedRect(this@MainActivity, UiColors.AMBER_LIGHT, 10f)
+            }, LinearLayout.LayoutParams(dp(30), dp(30)).apply { marginEnd = dp(8) })
+
+            addView(TextView(this@MainActivity).apply {
+                text = "手動輸入"
+                textSize = 13.5f
+                setTypeface(null, Typeface.BOLD)
+                setTextColor(UiColors.TEXT_MAIN)
+            })
+
+            setOnClickListener {
+                setFabMenuExpanded(expanded = false, animate = false)
+                openAddTransactionAction()
+            }
+        }
+    }
+
     private fun buildLedgerFabButton(): TextView {
         return TextView(this).apply {
             text = "＋"
-            contentDescription = "記一筆"
+            contentDescription = "新增帳目選單"
             textSize = 26f
             setTypeface(null, Typeface.BOLD)
             setTextColor(Color.WHITE)
@@ -1333,8 +1401,89 @@ class MainActivity : AppCompatActivity() {
                 UiColors.BG_CARD,
                 2f
             )
-            elevation = dpF(8f)
-            setOnClickListener { openAddTransactionAction() }
+            elevation = dpF(9f)
+            setOnClickListener {
+                setFabMenuExpanded(expanded = !isFabMenuExpanded, animate = true)
+            }
+        }
+    }
+
+    private fun setFabMenuExpanded(expanded: Boolean, animate: Boolean) {
+        if (isFabMenuExpanded == expanded && !animate) {
+            if (!expanded) {
+                ledgerFabBtn.rotation = 0f
+                fabMenuScrim.visibility = View.GONE
+                manualInputFabPill.visibility = View.GONE
+            }
+            return
+        }
+        isFabMenuExpanded = expanded
+        ledgerFabBtn.animate().cancel()
+        fabMenuScrim.animate().cancel()
+        manualInputFabPill.animate().cancel()
+
+        if (expanded) {
+            fabMenuScrim.visibility = View.VISIBLE
+            manualInputFabPill.visibility = View.VISIBLE
+            manualInputFabPill.post {
+                manualInputFabPill.pivotX = (manualInputFabPill.width - dpF(27f)).coerceAtLeast(0f)
+                manualInputFabPill.pivotY = manualInputFabPill.height.toFloat()
+            }
+            if (animate) {
+                fabMenuScrim.alpha = 0f
+                fabMenuScrim.animate().alpha(1f).setDuration(160L).start()
+
+                manualInputFabPill.alpha = 0f
+                manualInputFabPill.translationY = dpF(12f)
+                manualInputFabPill.scaleX = 0.88f
+                manualInputFabPill.scaleY = 0.88f
+                manualInputFabPill.animate()
+                    .alpha(1f)
+                    .translationY(0f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(180L)
+                    .start()
+
+                ledgerFabBtn.animate().rotation(45f).setDuration(180L).start()
+            } else {
+                fabMenuScrim.alpha = 1f
+                manualInputFabPill.alpha = 1f
+                manualInputFabPill.translationY = 0f
+                manualInputFabPill.scaleX = 1f
+                manualInputFabPill.scaleY = 1f
+                ledgerFabBtn.rotation = 45f
+            }
+        } else {
+            if (animate) {
+                ledgerFabBtn.animate().rotation(0f).setDuration(160L).start()
+                fabMenuScrim.animate()
+                    .alpha(0f)
+                    .setDuration(150L)
+                    .withEndAction {
+                        if (!isFabMenuExpanded) fabMenuScrim.visibility = View.GONE
+                    }
+                    .start()
+                manualInputFabPill.animate()
+                    .alpha(0f)
+                    .translationY(dpF(10f))
+                    .scaleX(0.88f)
+                    .scaleY(0.88f)
+                    .setDuration(150L)
+                    .withEndAction {
+                        if (!isFabMenuExpanded) manualInputFabPill.visibility = View.GONE
+                    }
+                    .start()
+            } else {
+                ledgerFabBtn.rotation = 0f
+                fabMenuScrim.alpha = 0f
+                fabMenuScrim.visibility = View.GONE
+                manualInputFabPill.alpha = 0f
+                manualInputFabPill.translationY = 0f
+                manualInputFabPill.scaleX = 1f
+                manualInputFabPill.scaleY = 1f
+                manualInputFabPill.visibility = View.GONE
+            }
         }
     }
 
@@ -1456,6 +1605,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun switchTab(tab: Tab) {
+        if (isFabMenuExpanded) {
+            setFabMenuExpanded(expanded = false, animate = false)
+        }
         activeTab = tab
         pageLedger.visibility = if (tab == Tab.LEDGER) View.VISIBLE else View.GONE
         pageStats.visibility = if (tab == Tab.STATS) View.VISIBLE else View.GONE
@@ -1498,7 +1650,11 @@ class MainActivity : AppCompatActivity() {
             currentYearMonth.year,
             currentYearMonth.monthValue
         )
-        ledgerFabBtn.visibility = if (activeTab == Tab.LEDGER && !locked) View.VISIBLE else View.GONE
+        val showFab = activeTab == Tab.LEDGER && !locked
+        if (!showFab && isFabMenuExpanded) {
+            setFabMenuExpanded(expanded = false, animate = false)
+        }
+        ledgerFabBtn.visibility = if (showFab) View.VISIBLE else View.GONE
 
         navTabs.forEach { (tab, pair) ->
             val active = tab == activeTab
