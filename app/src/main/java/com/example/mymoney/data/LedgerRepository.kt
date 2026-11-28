@@ -28,8 +28,15 @@ class LedgerRepository(context: Context) {
     companion object {
         private const val PREFS_NAME = "mymoney_warm_ledger_prefs"
         private const val KEY_DATA_JSON = "mymoney_warm_ledger_v2"
+        private const val KEY_DARK_MODE = "mymoney_dark_mode"
         private val UTF8_BOM = Char(0xFEFF).toString()
     }
+
+    var isDarkMode: Boolean
+        get() = prefs.getBoolean(KEY_DARK_MODE, false)
+        set(value) {
+            prefs.edit { putBoolean(KEY_DARK_MODE, value) }
+        }
 
     private fun load(): AppData {
         val raw = prefs.getString(KEY_DATA_JSON, null)

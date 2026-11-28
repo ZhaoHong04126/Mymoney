@@ -3,6 +3,7 @@ package com.example.mymoney.ui
 import android.app.DatePickerDialog
 import android.app.Dialog
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Build
@@ -29,6 +30,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsControllerCompat
+import androidx.core.widget.CompoundButtonCompat
 import com.example.mymoney.R
 import com.example.mymoney.data.LedgerRepository
 import com.example.mymoney.model.Account
@@ -64,7 +66,7 @@ object BottomSheetDialogs {
 
         // 頂部拖曳橫條指示器
         val handle = View(context).apply {
-            background = createRoundedRect(context, "#D5C8B8".toColorInt(), 99f)
+            background = createRoundedRect(context, UiColors.SHEET_HANDLE, 99f)
         }
         container.addView(handle, LinearLayout.LayoutParams(context.dp(38), context.dp(4)).apply {
             gravity = Gravity.CENTER_HORIZONTAL
@@ -106,9 +108,10 @@ object BottomSheetDialogs {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 win.isNavigationBarContrastEnforced = false
             }
+            win.setDimAmount(if (UiColors.isDark) 0.65f else 0.45f)
             WindowInsetsControllerCompat(win, win.decorView).apply {
-                isAppearanceLightStatusBars = true
-                isAppearanceLightNavigationBars = true
+                isAppearanceLightStatusBars = !UiColors.isDark
+                isAppearanceLightNavigationBars = !UiColors.isDark
             }
             win.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
             win.setGravity(Gravity.BOTTOM)
@@ -149,6 +152,7 @@ object BottomSheetDialogs {
     private fun makeWarmSpinner(context: Context, items: List<String>, selectedIndex: Int = 0): Spinner {
         return Spinner(context).apply {
             background = createRoundedRect(context, UiColors.BG_CARD, 11f, UiColors.BORDER_WARM, 1f)
+            setPopupBackgroundDrawable(createRoundedRect(context, UiColors.BG_CARD, 12f, UiColors.BORDER_WARM, 1f))
             setPadding(context.dp(6), context.dp(4), context.dp(6), context.dp(4))
             val adapter = object : ArrayAdapter<String>(
                 context,
@@ -167,6 +171,7 @@ object BottomSheetDialogs {
                     val v = super.getDropDownView(position, convertView, parent) as TextView
                     v.textSize = 13f
                     v.setTextColor(UiColors.TEXT_MAIN)
+                    v.setBackgroundColor(Color.TRANSPARENT)
                     v.setPadding(context.dp(12), context.dp(10), context.dp(12), context.dp(10))
                     return v
                 }
@@ -259,8 +264,8 @@ object BottomSheetDialogs {
 
         val segmentWrap = LinearLayout(context).apply {
             gravity = Gravity.CENTER
-            addView(segmentGroup)
         }
+        segmentWrap.addView(segmentGroup)
         header.addView(closeBtn)
         header.addView(segmentWrap, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         header.addView(deleteBtn)
@@ -294,7 +299,7 @@ object BottomSheetDialogs {
         val amountBox = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            background = createRoundedRect(context, UiColors.BG_CARD, 16f, "#EDD9B4".toColorInt(), 1.5f)
+            background = createRoundedRect(context, UiColors.BG_CARD, 16f, UiColors.AMOUNT_BOX_BORDER, 1.5f)
             setPadding(context.dp(12), context.dp(9), context.dp(12), context.dp(9))
         }
         val catBadgeIcon = TextView(context).apply { textSize = 20f }
@@ -307,9 +312,9 @@ object BottomSheetDialogs {
         val badgeLeft = LinearLayout(context).apply {
             orientation = LinearLayout.HORIZONTAL
             gravity = Gravity.CENTER_VERTICAL
-            addView(catBadgeIcon)
-            addView(catBadgeName)
         }
+        badgeLeft.addView(catBadgeIcon)
+        badgeLeft.addView(catBadgeName)
         val exprPreviewTv = TextView(context).apply {
             textSize = 11f
             setTextColor(UiColors.TEXT_MUTED)
@@ -324,9 +329,9 @@ object BottomSheetDialogs {
         val amountRight = LinearLayout(context).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.END
-            addView(exprPreviewTv)
-            addView(amountMainTv)
         }
+        amountRight.addView(exprPreviewTv)
+        amountRight.addView(amountMainTv)
         amountBox.addView(badgeLeft)
         amountBox.addView(amountRight, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         container.addView(amountBox, LinearLayout.LayoutParams(
@@ -417,6 +422,7 @@ object BottomSheetDialogs {
                 val parsed = runCatching { LocalDate.parse(selectedDate) }.getOrElse { LocalDate.now() }
                 DatePickerDialog(
                     context,
+                    if (UiColors.isDark) R.style.WarmDatePickerDialogDark else R.style.WarmDatePickerDialogLight,
                     { _, y, m, d ->
                         selectedDate = String.format(Locale.US, "%04d-%02d-%02d", y, m + 1, d)
                         text = context.getString(R.string.date_button_format, selectedDate)
@@ -450,6 +456,16 @@ object BottomSheetDialogs {
             text = "同時加入「每月固定週期收支」清單"
             textSize = 12f
             setTextColor(UiColors.TEXT_SECONDARY)
+            CompoundButtonCompat.setButtonTintList(
+                this,
+                ColorStateList(
+                    arrayOf(
+                        intArrayOf(android.R.attr.state_checked),
+                        intArrayOf(-android.R.attr.state_checked)
+                    ),
+                    intArrayOf(UiColors.AMBER_PRIMARY, UiColors.TEXT_SECONDARY)
+                )
+            )
             visibility = if (editingTx == null) View.VISIBLE else View.GONE
         }
         container.addView(recurringCheck, LinearLayout.LayoutParams(
@@ -457,15 +473,12 @@ object BottomSheetDialogs {
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { bottomMargin = context.dp(6) })
 
-        lateinit var submitKeyView: TextView
-
         fun refreshAmountDisplay() {
             val hasOp = calcExpr.any { it == '+' || it == '-' || it == '×' || it == '÷' }
             val valLong = evaluateCalcExpression(calcExpr)
             exprPreviewTv.text = if (hasOp) calcExpr else ""
             exprPreviewTv.visibility = if (hasOp) View.VISIBLE else View.GONE
             amountMainTv.text = formatCurrency(valLong)
-            submitKeyView.text = if (editingTx != null) "儲存修改 ✓" else "完成記帳 ✓"
         }
 
         fun refreshCategoryGrid() {
@@ -562,16 +575,8 @@ object BottomSheetDialogs {
         }
 
         // 建立 支出 / 收入 / 轉帳 切換按鈕
-        val segmentButtons = mutableMapOf<TxType, TextView>()
-        fun refreshSegmentedButtons() {
-            TxType.entries.forEach { type ->
-                val btn = segmentButtons[type] ?: return@forEach
-                val active = txType == type
-                btn.background = if (active) createRoundedRect(context, UiColors.AMBER_PRIMARY, 99f) else null
-                btn.setTextColor(if (active) Color.WHITE else UiColors.TEXT_SECONDARY)
-            }
-        }
-        TxType.entries.forEach { type ->
+        val segmentButtons = LinkedHashMap<TxType, TextView>(TxType.entries.size)
+        for (type in TxType.entries) {
             val btn = TextView(context).apply {
                 text = type.label
                 textSize = 12f
@@ -585,24 +590,14 @@ object BottomSheetDialogs {
                             selectedCatId = cats.firstOrNull()?.id ?: "exp_other"
                         }
                     }
-                    refreshSegmentedButtons()
+                    syncSegmentedButtons(context, segmentButtons, txType)
                     refreshCategoryGrid()
                 }
             }
             segmentButtons[type] = btn
             segmentGroup.addView(btn)
         }
-        refreshSegmentedButtons()
-
-        // 內建記帳計算機鍵盤 (4 欄 x 5 列)
-        val keypad = GridLayout(context).apply { columnCount = 4 }
-        val keys = listOf(
-            "7", "8", "9", "÷",
-            "4", "5", "6", "×",
-            "1", "2", "3", "-",
-            ".", "0", "BACK", "+",
-            "C", "OK"
-        )
+        syncSegmentedButtons(context, segmentButtons, txType)
 
         fun submitTransaction() {
             val amount = evaluateCalcExpression(calcExpr)
@@ -702,7 +697,45 @@ object BottomSheetDialogs {
             refreshAmountDisplay()
         }
 
-        keys.forEachIndexed { idx, key ->
+        // 內建記帳計算機鍵盤 (4 欄 x 5 列)
+        val keypad = buildCalcKeypad(context, isEditing = editingTx != null, onKey = ::handleCalcKey)
+        container.addView(keypad, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ))
+
+        refreshCategoryGrid()
+        refreshAmountDisplay()
+        dialog.show()
+    }
+
+    private fun syncSegmentedButtons(
+        context: Context,
+        segmentButtons: Map<TxType, TextView>,
+        activeType: TxType
+    ) {
+        for (type in TxType.entries) {
+            val btn = segmentButtons[type] ?: continue
+            val active = activeType == type
+            btn.background = if (active) createRoundedRect(context, UiColors.AMBER_PRIMARY, 99f) else null
+            btn.setTextColor(if (active) Color.WHITE else UiColors.TEXT_SECONDARY)
+        }
+    }
+
+    private fun buildCalcKeypad(
+        context: Context,
+        isEditing: Boolean,
+        onKey: (String) -> Unit
+    ): GridLayout {
+        val keypad = GridLayout(context).apply { columnCount = 4 }
+        val keys = listOf(
+            "7", "8", "9", "÷",
+            "4", "5", "6", "×",
+            "1", "2", "3", "-",
+            ".", "0", "BACK", "+",
+            "C", "OK"
+        )
+        for ((idx, key) in keys.withIndex()) {
             val isOk = key == "OK"
             val isClear = key == "C"
             val isOp = key in setOf("÷", "×", "-", "+")
@@ -712,7 +745,7 @@ object BottomSheetDialogs {
                 "-" -> "−"
                 "+" -> "＋"
                 "C" -> "AC"
-                "OK" -> if (editingTx != null) "儲存修改 ✓" else "完成記帳 ✓"
+                "OK" -> if (isEditing) "儲存修改 ✓" else "完成記帳 ✓"
                 else -> key
             }
 
@@ -728,7 +761,7 @@ object BottomSheetDialogs {
                 background = when {
                     isOk -> createGradientRect(context, "#F4B247".toColorInt(), "#E68D18".toColorInt(), 12f)
                     isClear -> createRoundedRect(context, UiColors.EXPENSE_BG, 12f, UiColors.EXPENSE_BORDER, 1f)
-                    isOp -> createRoundedRect(context, "#F5EAD8".toColorInt(), 12f, UiColors.BORDER_WARM, 1f)
+                    isOp -> createRoundedRect(context, UiColors.CALC_OP_BG, 12f, UiColors.BORDER_WARM, 1f)
                     else -> createRoundedRect(context, UiColors.BG_CARD, 12f, UiColors.BORDER_WARM, 1f)
                 }
                 setTextColor(
@@ -739,9 +772,8 @@ object BottomSheetDialogs {
                         else -> UiColors.TEXT_MAIN
                     }
                 )
-                setOnClickListener { handleCalcKey(key) }
+                setOnClickListener { onKey(key) }
             }
-            if (isOk) submitKeyView = keyBtn
 
             val row = idx / 4
             val col = idx % 4
@@ -756,15 +788,7 @@ object BottomSheetDialogs {
             }
             keypad.addView(keyBtn, params)
         }
-
-        container.addView(keypad, LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        ))
-
-        refreshCategoryGrid()
-        refreshAmountDisplay()
-        dialog.show()
+        return keypad
     }
 
     // =========================================================================
@@ -1223,6 +1247,7 @@ object BottomSheetDialogs {
                     val v = super.getDropDownView(position, convertView, parent) as TextView
                     v.textSize = 13f
                     v.setTextColor(UiColors.TEXT_MAIN)
+                    v.setBackgroundColor(Color.TRANSPARENT)
                     v.setPadding(context.dp(12), context.dp(10), context.dp(12), context.dp(10))
                     return v
                 }

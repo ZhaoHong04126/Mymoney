@@ -1,7 +1,7 @@
 # 🍯 快樂記帳本 (Mymoney)
 
 > **今天也要溫柔地打理生活 ✨**  
-> 一款採用溫暖琥珀奶油色系設計的原生 Android 個人記帳與多帳戶資產管理 App（桌面名稱：**生活記帳本**）。全程本機離線儲存、零廣告、免註冊、無網路權限需求，讓日常理財回歸單純與安心。
+> 一款採用溫暖琥珀色系設計、支援**暖陽淺色／靜謐深色**雙主題切換的原生 Android 個人記帳與多帳戶資產管理 App（桌面名稱：**生活記帳本**）。全程本機離線儲存、零廣告、免註冊、無網路權限需求，讓日常理財回歸單純與安心。
 
 ---
 
@@ -58,6 +58,12 @@
 - 預設內建 **8 種支出分類**與 **4 種收入分類**，並提供 23 款精選 Emoji 圖示自由新增、重新命名或刪除分類。
 - 內建系統保留分類（「其他支出 ✨」、「其他收入 🌟」）防誤刪保護，並支援一鍵還原系統預設分類。
 
+### 🌓 深淺色雙主題一鍵切換
+- 於 **「⚙️ 更多」** 分頁內建 **「深淺色切換」** 卡片，可直接點選 **`☀️ 淺色`**／**`🌙 深色`** 膠囊按鈕或點擊整張卡片一鍵切換：
+  - **暖陽淺色主題**：柔和琥珀奶油底色搭配清晰深棕文字，日常瀏覽溫暖明亮。
+  - **靜謐深色主題**：延續品牌溫度的暖棕可可底色與柔光琥珀強調色，夜晚記帳護眼不刺眼。
+- **全介面無縫適配與自動記憶**：涵蓋首頁滑動儀表板、統計圓環圖、多帳戶淨資產卡、歷史月份霧面鎖定遮罩、記帳計算機抽屜、下拉選單與日期選擇器，並同步切換系統狀態列／導覽列圖示亮暗度；切換過程即時無閃爍、保留當下分頁與捲動位置，且自動記憶偏好設定於下次啟動時套用。
+
 ### 📦 資料備份匯出與匯入
 - 採用 Android 系統級 Storage Access Framework (SAF) 讀寫檔案，無須授予敏感儲存權限。
 - **匯出 CSV**：自動加上 UTF-8 BOM 檔頭（檔名預設為 `快樂記帳本_備份資料_YYYY-MM.csv`），使用 Excel 直接開啟不亂碼。
@@ -69,10 +75,10 @@
 
 | 項目 | 規格說明 |
 | :--- | :--- |
-| **目前版本** | `v1.4.0`（於「⚙️ 更多」分頁底部自動讀取顯示） |
+| **目前版本** | `v1.5.0`（於「⚙️ 更多」分頁底部自動讀取顯示） |
 | **開發語言** | Kotlin |
-| **UI 架構** | 原生 Android View 動態建構（自訂 `DonutChartView`、`HorizontalCardPager`、`WrapLayout`、暖色系 Bottom Sheet 與確認對話框） |
-| **資料儲存** | 本機 `SharedPreferences` + 原生 `org.json` 結構化持久化（完全離線） |
+| **UI 架構** | 原生 Android View 動態建構（支援暖陽淺色／靜謐深色雙主題即時無閃爍切換、自訂 `DonutChartView`、`HorizontalCardPager`、`WrapLayout`、Bottom Sheet 與確認對話框） |
+| **資料儲存** | 本機 `SharedPreferences`（含深淺色主題偏好）+ 原生 `org.json` 結構化持久化（完全離線） |
 | **最低支援系統** | Android 8.0 (API Level 26) |
 | **目標 / 編譯 SDK** | API Level 37 (`compileSdk = 37`, `targetSdk = 37`) |
 | **建置工具** | Gradle `9.9.2` / Android Gradle Plugin `9.5.2` |
@@ -90,19 +96,19 @@ Mymoney/
 │   └── src/main/
 │       ├── AndroidManifest.xml
 │       ├── java/com/example/mymoney/
-│       │   ├── MainActivity.kt             # 主畫面、一體式滑動儀表板、四大分頁導覽、展開式「＋」懸浮記帳選單與 SAF 檔案匯出入
+│       │   ├── MainActivity.kt             # 主畫面、一體式滑動儀表板、四大分頁導覽、深淺色即時切換、展開式「＋」懸浮記帳選單與 SAF 檔案匯出入
 │       │   ├── data/
-│       │   │   └── LedgerRepository.kt     # 本機 JSON 存取、餘額計算、週期入帳與 CSV/JSON 解析
+│       │   │   └── LedgerRepository.kt     # 本機 JSON 與主題偏好存取、餘額計算、週期入帳與 CSV/JSON 解析
 │       │   ├── model/
 │       │   │   └── Models.kt               # 交易、帳戶、分類、週期收支資料模型與預設常數
 │       │   └── ui/
 │       │       ├── BottomSheetDialogs.kt   # 記帳計算機、預算、帳戶、週期收支、分類與匯出入抽屜
 │       │       ├── DonutChartView.kt       # 自訂互動式甜甜圈統計圓環圖元件
-│       │       └── UiHelpers.kt            # 暖色系主題色票、四則運算解析器、HorizontalCardPager、WrapLayout 與通用對話框
+│       │       └── UiHelpers.kt            # 深淺雙主題色票 (UiColors)、四則運算解析器、HorizontalCardPager、WrapLayout 與通用對話框
 │       └── res/
 │           ├── drawable/                   # 啟動器圖示前景與背景向量資源
 │           ├── mipmap-anydpi/              # Adaptive Icon 設定
-│           └── values/                     # 字串 (strings.xml)、色彩 (colors.xml) 與主題樣式 (themes.xml)
+│           └── values/                     # 字串 (strings.xml)、色彩 (colors.xml) 與深淺對話框主題樣式 (themes.xml)
 ├── build.gradle.kts
 ├── settings.gradle.kts
 └── gradlew / gradlew.bat

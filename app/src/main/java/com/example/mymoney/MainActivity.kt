@@ -142,6 +142,10 @@ class MainActivity : AppCompatActivity() {
     // 更多 / 設定視圖元件
     private lateinit var moreRecurringSummaryTv: TextView
     private lateinit var moreCategorySummaryTv: TextView
+    private lateinit var moreThemeIconTv: TextView
+    private lateinit var moreThemeSummaryTv: TextView
+    private lateinit var themeLightPillBtn: TextView
+    private lateinit var themeDarkPillBtn: TextView
 
     // Android 系統檔案匯出器 (SAF)
     private val exportCsvLauncher = registerForActivityResult(
@@ -170,18 +174,58 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        repo = LedgerRepository(this)
+        UiColors.isDark = repo.isDarkMode
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             window.isNavigationBarContrastEnforced = false
         }
-        WindowInsetsControllerCompat(window, window.decorView).apply {
-            isAppearanceLightStatusBars = true
-            isAppearanceLightNavigationBars = true
-        }
-        repo = LedgerRepository(this)
+        applySystemBarAppearance()
         buildRootUi()
         setupBackNavigation()
         renderAll()
+    }
+
+    private fun applySystemBarAppearance() {
+        val dark = UiColors.isDark
+        window.decorView.setBackgroundColor(UiColors.BG_SCREEN)
+        @Suppress("DEPRECATION")
+        window.statusBarColor = Color.TRANSPARENT
+        @Suppress("DEPRECATION")
+        window.navigationBarColor = Color.TRANSPARENT
+        WindowInsetsControllerCompat(window, window.decorView).apply {
+            isAppearanceLightStatusBars = !dark
+            isAppearanceLightNavigationBars = !dark
+        }
+    }
+
+    private fun applyThemeMode(dark: Boolean) {
+        if (repo.isDarkMode == dark && UiColors.isDark == dark) return
+        repo.isDarkMode = dark
+        UiColors.isDark = dark
+        applySystemBarAppearance()
+
+        val savedHeroPage = if (::overviewBudgetPager.isInitialized) overviewBudgetPager.currentPage else 0
+        val savedScrollY = if (::mainScrollView.isInitialized) mainScrollView.scrollY else 0
+
+        toastHideRunnable?.let { toastHandler.removeCallbacks(it) }
+        isFabMenuExpanded = false
+        navTabs.clear()
+        filterChipViews.clear()
+
+        buildRootUi()
+
+        pageLedger.visibility = if (activeTab == Tab.LEDGER) View.VISIBLE else View.GONE
+        pageStats.visibility = if (activeTab == Tab.STATS) View.VISIBLE else View.GONE
+        pageAccounts.visibility = if (activeTab == Tab.ACCOUNTS) View.VISIBLE else View.GONE
+        pageMore.visibility = if (activeTab == Tab.MORE) View.VISIBLE else View.GONE
+        monthSwitcherContainer.visibility = if (activeTab == Tab.MORE) View.GONE else View.VISIBLE
+
+        renderAll()
+        overviewBudgetPager.setCurrentPage(savedHeroPage, smooth = false)
+        mainScrollView.post { mainScrollView.scrollTo(0, savedScrollY) }
+        showToast(if (dark) "已切換為靜謐深色模式 🌙" else "已切換為暖陽淺色模式 ☀️")
     }
 
     private fun setupBackNavigation() {
@@ -252,7 +296,7 @@ class MainActivity : AppCompatActivity() {
         fabMenuScrim = View(this).apply {
             visibility = View.GONE
             alpha = 0f
-            setBackgroundColor("#333D3127".toColorInt())
+            setBackgroundColor(UiColors.SCRIM_OVERLAY)
             isClickable = true
             setOnClickListener { setFabMenuExpanded(expanded = false, animate = true) }
         }
@@ -307,8 +351,14 @@ class MainActivity : AppCompatActivity() {
             visibility = View.GONE
             textSize = 12.5f
             setTypeface(null, Typeface.BOLD)
-            setTextColor("#FFFDF8".toColorInt())
-            background = createRoundedRect(this@MainActivity, "#EB3D3127".toColorInt(), 99f)
+            setTextColor(UiColors.TOAST_TEXT)
+            background = createRoundedRect(
+                this@MainActivity,
+                UiColors.TOAST_BG,
+                99f,
+                UiColors.TOAST_BORDER,
+                1f
+            )
             setPadding(dp(16), dp(8), dp(16), dp(8))
             elevation = dpF(8f)
         }
@@ -461,7 +511,7 @@ class MainActivity : AppCompatActivity() {
             visibility = View.GONE
             isClickable = true
             isFocusable = true
-            setBackgroundColor("#B3FAF5EC".toColorInt())
+            setBackgroundColor(UiColors.LOCKED_OVERLAY_BG)
             setPadding(dp(24), dp(24), dp(24), dp(24))
         }
 
@@ -470,9 +520,9 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER_HORIZONTAL
             background = createRoundedRect(
                 this@MainActivity,
-                "#F5FFFDF8".toColorInt(),
+                UiColors.LOCKED_CARD_BG,
                 24f,
-                "#EADBC5".toColorInt(),
+                UiColors.LOCKED_CARD_BORDER,
                 1.5f
             )
             setPadding(dp(20), dp(22), dp(20), dp(18))
@@ -590,7 +640,7 @@ class MainActivity : AppCompatActivity() {
                 text = "本月總支出"
                 textSize = 12f
                 setTypeface(null, Typeface.BOLD)
-                setTextColor("#84633B".toColorInt())
+                setTextColor(UiColors.HERO_LABEL)
             })
             monthExpenseTv = TextView(this@MainActivity).apply {
                 textSize = 27f
@@ -604,9 +654,9 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.END
             background = createRoundedRect(
                 this@MainActivity,
-                "#C7FFFDF8".toColorInt(),
+                UiColors.HERO_PILL_BG,
                 14f,
-                "#B3EBC686".toColorInt(),
+                UiColors.HERO_PILL_BORDER,
                 1f
             )
             setPadding(dp(11), dp(6), dp(11), dp(6))
@@ -632,7 +682,7 @@ class MainActivity : AppCompatActivity() {
         ).apply { bottomMargin = dp(10) })
 
         overviewSlide.addView(View(this).apply {
-            setBackgroundColor("#4DBA9256".toColorInt())
+            setBackgroundColor(UiColors.HERO_DIVIDER)
         }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(1)).apply {
             bottomMargin = dp(10)
         })
@@ -650,7 +700,7 @@ class MainActivity : AppCompatActivity() {
             addView(TextView(this@MainActivity).apply {
                 text = "本月收入 "
                 textSize = 12f
-                setTextColor("#7D6242".toColorInt())
+                setTextColor(UiColors.HERO_SUB_LABEL)
             })
             monthIncomeTv = TextView(this@MainActivity).apply {
                 textSize = 12.5f
@@ -669,7 +719,7 @@ class MainActivity : AppCompatActivity() {
             addView(TextView(this@MainActivity).apply {
                 text = "總淨資產 "
                 textSize = 12f
-                setTextColor("#7D6242".toColorInt())
+                setTextColor(UiColors.HERO_SUB_LABEL)
             })
             heroNetWorthTv = TextView(this@MainActivity).apply {
                 textSize = 12.5f
@@ -680,7 +730,7 @@ class MainActivity : AppCompatActivity() {
         }
         heroSub.addView(subLeft, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
         heroSub.addView(View(this).apply {
-            setBackgroundColor("#59BA9256".toColorInt())
+            setBackgroundColor(UiColors.HERO_DIVIDER)
         }, LinearLayout.LayoutParams(dp(1), dp(14)).apply {
             marginStart = dp(8)
             marginEnd = dp(8)
@@ -721,9 +771,9 @@ class MainActivity : AppCompatActivity() {
             setTextColor(UiColors.AMBER_TEXT_DARK)
             background = createRoundedRect(
                 this@MainActivity,
-                "#C7FFFDF8".toColorInt(),
+                UiColors.HERO_PILL_BG,
                 99f,
-                "#B3EBC686".toColorInt(),
+                UiColors.HERO_PILL_BORDER,
                 1f
             )
             setPadding(dp(9), dp(4), dp(9), dp(4))
@@ -744,9 +794,9 @@ class MainActivity : AppCompatActivity() {
         val track = FrameLayout(this).apply {
             background = createRoundedRect(
                 this@MainActivity,
-                "#D9FFFDF8".toColorInt(),
+                UiColors.HERO_TRACK_BG,
                 99f,
-                "#59BA9256".toColorInt(),
+                UiColors.HERO_DIVIDER,
                 1f
             )
             clipToOutline = true
@@ -762,7 +812,7 @@ class MainActivity : AppCompatActivity() {
         budgetUsedTv = TextView(this).apply {
             textSize = 12f
             setTypeface(null, Typeface.BOLD)
-            setTextColor("#7D6242".toColorInt())
+            setTextColor(UiColors.HERO_SUB_LABEL)
         }
         budgetRemainTv = TextView(this).apply {
             textSize = 12f
@@ -788,7 +838,7 @@ class MainActivity : AppCompatActivity() {
             setPadding(dp(8), dp(6), dp(8), dp(2))
         }
         pagerDot0Drawable = createRoundedRect(this, UiColors.AMBER_DARK, 99f)
-        pagerDot1Drawable = createRoundedRect(this, "#4D84633B".toColorInt(), 99f)
+        pagerDot1Drawable = createRoundedRect(this, UiColors.HERO_DOT_INACTIVE, 99f)
 
         val dot0TouchWrap = FrameLayout(this).apply {
             contentDescription = "本月收支總覽"
@@ -904,6 +954,7 @@ class MainActivity : AppCompatActivity() {
 
         accountFilterSpinner = Spinner(this).apply {
             background = createRoundedRect(this@MainActivity, UiColors.BG_CARD, 10f, UiColors.BORDER_WARM, 1f)
+            setPopupBackgroundDrawable(createRoundedRect(this@MainActivity, UiColors.BG_CARD, 12f, UiColors.BORDER_WARM, 1f))
             setPadding(dp(4), dp(2), dp(4), dp(2))
             onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
                 override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
@@ -1082,7 +1133,9 @@ class MainActivity : AppCompatActivity() {
                 this@MainActivity,
                 UiColors.DARK_NW_START,
                 UiColors.DARK_NW_END,
-                20f
+                20f,
+                if (UiColors.isDark) UiColors.HERO_BORDER else null,
+                1f
             )
             setPadding(dp(16), dp(16), dp(16), dp(16))
         }
@@ -1284,7 +1337,71 @@ class MainActivity : AppCompatActivity() {
             LinearLayout.LayoutParams.WRAP_CONTENT
         ).apply { bottomMargin = dp(12) })
 
-        // 3. 一鈕式：資料匯出 / 匯入 (置於最下方)
+        // 3. 深淺色模式切換
+        val themeCard = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            background = createRoundedRect(this@MainActivity, UiColors.BG_CARD, 20f, UiColors.BORDER_WARM, 1f)
+            setPadding(dp(15), dp(13), dp(15), dp(13))
+            setOnClickListener { applyThemeMode(!UiColors.isDark) }
+        }
+        moreThemeIconTv = TextView(this).apply {
+            text = if (UiColors.isDark) "🌙" else "☀️"
+            textSize = 20f
+            gravity = Gravity.CENTER
+            background = createRoundedRect(this@MainActivity, UiColors.AMBER_LIGHT, 12f)
+        }
+        themeCard.addView(moreThemeIconTv, LinearLayout.LayoutParams(dp(40), dp(40)))
+
+        val themeCol = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(dp(11), 0, dp(8), 0)
+            addView(TextView(this@MainActivity).apply {
+                text = "深淺色切換"
+                textSize = 13.5f
+                setTypeface(null, Typeface.BOLD)
+                setTextColor(UiColors.TEXT_MAIN)
+            })
+        }
+        moreThemeSummaryTv = TextView(this).apply {
+            textSize = 11f
+            setTextColor(UiColors.TEXT_SECONDARY)
+        }
+        themeCol.addView(moreThemeSummaryTv)
+        themeCard.addView(themeCol, LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f))
+
+        val themeSwitchBox = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            background = createRoundedRect(this@MainActivity, UiColors.BG_INPUT, 99f, UiColors.BORDER_WARM, 1f)
+            setPadding(dp(3), dp(3), dp(3), dp(3))
+        }
+        themeLightPillBtn = TextView(this).apply {
+            text = "☀️ 淺色"
+            textSize = 11.5f
+            setTypeface(null, Typeface.BOLD)
+            gravity = Gravity.CENTER
+            setPadding(dp(9), dp(5), dp(9), dp(5))
+            setOnClickListener { applyThemeMode(false) }
+        }
+        themeDarkPillBtn = TextView(this).apply {
+            text = "🌙 深色"
+            textSize = 11.5f
+            setTypeface(null, Typeface.BOLD)
+            gravity = Gravity.CENTER
+            setPadding(dp(9), dp(5), dp(9), dp(5))
+            setOnClickListener { applyThemeMode(true) }
+        }
+        themeSwitchBox.addView(themeLightPillBtn)
+        themeSwitchBox.addView(themeDarkPillBtn)
+        themeCard.addView(themeSwitchBox)
+
+        page.addView(themeCard, LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        ).apply { bottomMargin = dp(12) })
+
+        // 4. 一鈕式：資料匯出 / 匯入 (置於最下方)
         val (ioCard, ioSub) = makeSingleCardButton("📦", "資料匯出 / 匯入") {
             BottomSheetDialogs.showDataIoSheet(
                 context = this@MainActivity,
@@ -1726,11 +1843,15 @@ class MainActivity : AppCompatActivity() {
                 val v = super.getDropDownView(position, convertView, parent) as TextView
                 v.textSize = 12.5f
                 v.setTextColor(UiColors.TEXT_MAIN)
+                v.setBackgroundColor(Color.TRANSPARENT)
                 v.setPadding(dp(12), dp(10), dp(12), dp(10))
                 return v
             }
         }
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        accountFilterSpinner.setPopupBackgroundDrawable(
+            createRoundedRect(this, UiColors.BG_CARD, 12f, UiColors.BORDER_WARM, 1f)
+        )
         accountFilterSpinner.adapter = adapter
         accountFilterSpinner.setSelection(selectedIndex, false)
         suppressAccountSpinnerEvent = false
@@ -1739,7 +1860,7 @@ class MainActivity : AppCompatActivity() {
     private fun updateHeroPagerIndicator(progress: Float) {
         val t = progress.coerceIn(0f, 1f)
         val activeColor = UiColors.AMBER_DARK
-        val inactiveColor = "#4D84633B".toColorInt()
+        val inactiveColor = UiColors.HERO_DOT_INACTIVE
 
         pagerDot0Drawable.setColor(ColorUtils.blendARGB(inactiveColor, activeColor, 1f - t))
         pagerDot1Drawable.setColor(ColorUtils.blendARGB(inactiveColor, activeColor, t))
@@ -1794,7 +1915,7 @@ class MainActivity : AppCompatActivity() {
             budget <= 0L -> {
                 budgetStatusTagTv.text = "尚未設定預算"
                 budgetStatusTagTv.setTextColor(UiColors.INCOME)
-                budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f, "#6646937E".toColorInt(), 1f)
+                budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f, UiColors.INCOME_BORDER, 1f)
                 budgetProgressFill.background = createGradientRect(this, "#F6C36B".toColorInt(), UiColors.AMBER_PRIMARY, 99f)
             }
             rawPct >= 100 -> {
@@ -1806,13 +1927,13 @@ class MainActivity : AppCompatActivity() {
             rawPct >= 80 -> {
                 budgetStatusTagTv.text = "接近預算上限"
                 budgetStatusTagTv.setTextColor(UiColors.WARN_TEXT)
-                budgetStatusTagTv.background = createRoundedRect(this, UiColors.WARN_BG, 99f, "#CCA86B14".toColorInt(), 1f)
+                budgetStatusTagTv.background = createRoundedRect(this, UiColors.WARN_BG, 99f, UiColors.WARN_BORDER, 1f)
                 budgetProgressFill.background = createGradientRect(this, "#F5B041".toColorInt(), "#E67E22".toColorInt(), 99f)
             }
             else -> {
                 budgetStatusTagTv.text = "安心花費中 ✨"
                 budgetStatusTagTv.setTextColor(UiColors.INCOME)
-                budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f, "#6646937E".toColorInt(), 1f)
+                budgetStatusTagTv.background = createRoundedRect(this, UiColors.INCOME_BG, 99f, UiColors.INCOME_BORDER, 1f)
                 budgetProgressFill.background = createGradientRect(this, "#F6C36B".toColorInt(), UiColors.AMBER_PRIMARY, 99f)
             }
         }
@@ -2093,7 +2214,7 @@ class MainActivity : AppCompatActivity() {
                     this@MainActivity,
                     UiColors.BG_CARD,
                     16f,
-                    if (selectedStatCategoryId == catId) "#E5C899".toColorInt() else UiColors.BORDER_WARM,
+                    if (selectedStatCategoryId == catId) UiColors.SELECTED_CARD_BORDER else UiColors.BORDER_WARM,
                     1f
                 )
                 setPadding(dp(13), dp(11), dp(13), dp(11))
@@ -2289,6 +2410,14 @@ class MainActivity : AppCompatActivity() {
         val expCount = repo.data.expenseCategories.size
         val incCount = repo.data.incomeCategories.size
         moreCategorySummaryTv.text = getString(R.string.more_category_summary, expCount, incCount)
+
+        val dark = UiColors.isDark
+        moreThemeIconTv.text = if (dark) "🌙" else "☀️"
+        moreThemeSummaryTv.text = if (dark) "目前為靜謐深色主題" else "目前為暖陽淺色主題"
+        themeLightPillBtn.background = if (!dark) createRoundedRect(this, UiColors.AMBER_PRIMARY, 99f) else null
+        themeLightPillBtn.setTextColor(if (!dark) Color.WHITE else UiColors.TEXT_SECONDARY)
+        themeDarkPillBtn.background = if (dark) createRoundedRect(this, UiColors.AMBER_PRIMARY, 99f) else null
+        themeDarkPillBtn.setTextColor(if (dark) Color.WHITE else UiColors.TEXT_SECONDARY)
     }
 
     private fun buildEmptyCard(icon: String, title: String, desc: String): LinearLayout {

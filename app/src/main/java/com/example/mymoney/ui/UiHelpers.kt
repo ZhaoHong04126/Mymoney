@@ -16,7 +16,6 @@ import android.view.animation.Interpolator
 import android.widget.LinearLayout
 import android.widget.OverScroller
 import android.widget.TextView
-import androidx.core.graphics.toColorInt
 import androidx.core.view.isGone
 import java.text.NumberFormat
 import java.time.DayOfWeek
@@ -29,42 +28,66 @@ import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 object UiColors {
-    val BG_SCREEN = "#FAF5EC".toColorInt()
-    val BG_CARD = "#FFFDF8".toColorInt()
-    val BG_INPUT = "#F6F0E4".toColorInt()
-    val BG_DAY_HEADER = "#F9F2E6".toColorInt()
-    val DIVIDER = "#F3ECE0".toColorInt()
+    var isDark: Boolean = false
 
-    val AMBER_PRIMARY = "#EE9B27".toColorInt()
-    val AMBER_DARK = "#D68111".toColorInt()
-    val AMBER_LIGHT = "#FCE8C3".toColorInt()
-    val AMBER_TEXT_DARK = "#9A5B06".toColorInt()
+    val BG_SCREEN: Int get() = if (isDark) 0xFF181410.toInt() else 0xFFFAF5EC.toInt()
+    val BG_CARD: Int get() = if (isDark) 0xFF241E18.toInt() else 0xFFFFFDF8.toInt()
+    val BG_INPUT: Int get() = if (isDark) 0xFF2F2720.toInt() else 0xFFF6F0E4.toInt()
+    val BG_DAY_HEADER: Int get() = if (isDark) 0xFF2B231C.toInt() else 0xFFF9F2E6.toInt()
+    val DIVIDER: Int get() = if (isDark) 0xFF332B23.toInt() else 0xFFF3ECE0.toInt()
 
-    val HERO_GRAD_START = "#FFF7E5".toColorInt()
-    val HERO_GRAD_END = "#FCE5BA".toColorInt()
-    val HERO_BORDER = "#F3D59B".toColorInt()
+    val AMBER_PRIMARY: Int get() = if (isDark) 0xFFF0A230.toInt() else 0xFFEE9B27.toInt()
+    val AMBER_DARK: Int get() = if (isDark) 0xFFF5B349.toInt() else 0xFFD68111.toInt()
+    val AMBER_LIGHT: Int get() = if (isDark) 0xFF3D2E1A.toInt() else 0xFFFCE8C3.toInt()
+    val AMBER_TEXT_DARK: Int get() = if (isDark) 0xFFFAC873.toInt() else 0xFF9A5B06.toInt()
 
-    val EXPENSE = "#DF6A4E".toColorInt()
-    val EXPENSE_BG = "#FCECE8".toColorInt()
-    val EXPENSE_BORDER = "#F2C6BC".toColorInt()
-    val INCOME = "#46937E".toColorInt()
-    val INCOME_BG = "#E5F4EF".toColorInt()
-    val TRANSFER = "#8E6E53".toColorInt()
-    val TRANSFER_BG = "#F2EBE3".toColorInt()
+    val HERO_GRAD_START: Int get() = if (isDark) 0xFF36291B.toInt() else 0xFFFFF7E5.toInt()
+    val HERO_GRAD_END: Int get() = if (isDark) 0xFF281E14.toInt() else 0xFFFCE5BA.toInt()
+    val HERO_BORDER: Int get() = if (isDark) 0xFF574126.toInt() else 0xFFF3D59B.toInt()
+    val HERO_LABEL: Int get() = if (isDark) 0xFFD8BA92.toInt() else 0xFF84633B.toInt()
+    val HERO_SUB_LABEL: Int get() = if (isDark) 0xFFCDB496.toInt() else 0xFF7D6242.toInt()
+    val HERO_PILL_BG: Int get() = if (isDark) 0x991A1510.toInt() else 0xC7FFFDF8.toInt()
+    val HERO_PILL_BORDER: Int get() = if (isDark) 0x66A87E3E.toInt() else 0xB3EBC686.toInt()
+    val HERO_DIVIDER: Int get() = if (isDark) 0x4DA8824C.toInt() else 0x4DBA9256.toInt()
+    val HERO_TRACK_BG: Int get() = if (isDark) 0xB3181410.toInt() else 0xD9FFFDF8.toInt()
+    val HERO_DOT_INACTIVE: Int get() = if (isDark) 0x59D8BA92.toInt() else 0x4D84633B.toInt()
 
-    val WARN_BG = "#EBFFFDF8".toColorInt()
-    val WARN_TEXT = "#C87609".toColorInt()
-    val BANNER_BG = "#FFF9EB".toColorInt()
-    val BANNER_BORDER = "#F4D89E".toColorInt()
+    val EXPENSE: Int get() = if (isDark) 0xFFF08065.toInt() else 0xFFDF6A4E.toInt()
+    val EXPENSE_BG: Int get() = if (isDark) 0xFF3A221D.toInt() else 0xFFFCECE8.toInt()
+    val EXPENSE_BORDER: Int get() = if (isDark) 0xFF664037.toInt() else 0xFFF2C6BC.toInt()
+    val INCOME: Int get() = if (isDark) 0xFF63B8A0.toInt() else 0xFF46937E.toInt()
+    val INCOME_BG: Int get() = if (isDark) 0xFF1D332D.toInt() else 0xFFE5F4EF.toInt()
+    val INCOME_BORDER: Int get() = if (isDark) 0x6663B8A0.toInt() else 0x6646937E.toInt()
+    val TRANSFER: Int get() = if (isDark) 0xFFC4A080.toInt() else 0xFF8E6E53.toInt()
+    val TRANSFER_BG: Int get() = if (isDark) 0xFF302720.toInt() else 0xFFF2EBE3.toInt()
 
-    val DARK_NW_START = "#4E3E30".toColorInt()
-    val DARK_NW_END = "#382B20".toColorInt()
-    val DARK_NW_GOLD = "#F9C971".toColorInt()
+    val WARN_BG: Int get() = if (isDark) 0xFF3B2B17.toInt() else 0xEBFFFDF8.toInt()
+    val WARN_TEXT: Int get() = if (isDark) 0xFFF7B955.toInt() else 0xFFC87609.toInt()
+    val WARN_BORDER: Int get() = if (isDark) 0x80D48C2A.toInt() else 0xCCA86B14.toInt()
+    val BANNER_BG: Int get() = if (isDark) 0xFF302619.toInt() else 0xFFFFF9EB.toInt()
+    val BANNER_BORDER: Int get() = if (isDark) 0xFF594426.toInt() else 0xFFF4D89E.toInt()
 
-    val TEXT_MAIN = "#3D3127".toColorInt()
-    val TEXT_SECONDARY = "#7B6B5D".toColorInt()
-    val TEXT_MUTED = "#A69688".toColorInt()
-    val BORDER_WARM = "#EAE0D1".toColorInt()
+    val DARK_NW_START: Int get() = if (isDark) 0xFF3B2E22.toInt() else 0xFF4E3E30.toInt()
+    val DARK_NW_END: Int get() = if (isDark) 0xFF281F17.toInt() else 0xFF382B20.toInt()
+    val DARK_NW_GOLD: Int get() = 0xFFF9C971.toInt()
+
+    val TEXT_MAIN: Int get() = if (isDark) 0xFFF5ECE0.toInt() else 0xFF3D3127.toInt()
+    val TEXT_SECONDARY: Int get() = if (isDark) 0xFFB8A796.toInt() else 0xFF7B6B5D.toInt()
+    val TEXT_MUTED: Int get() = if (isDark) 0xFF877768.toInt() else 0xFFA69688.toInt()
+    val BORDER_WARM: Int get() = if (isDark) 0xFF3B3128.toInt() else 0xFFEAE0D1.toInt()
+
+    val SCRIM_OVERLAY: Int get() = if (isDark) 0x73000000.toInt() else 0x333D3127.toInt()
+    val LOCKED_OVERLAY_BG: Int get() = if (isDark) 0xBF181410.toInt() else 0xB3FAF5EC.toInt()
+    val LOCKED_CARD_BG: Int get() = if (isDark) 0xF526201A.toInt() else 0xF5FFFDF8.toInt()
+    val LOCKED_CARD_BORDER: Int get() = if (isDark) 0xFF4A3C2E.toInt() else 0xFFEADBC5.toInt()
+    val SELECTED_CARD_BORDER: Int get() = if (isDark) 0xFF8C6836.toInt() else 0xFFE5C899.toInt()
+    val DONUT_EMPTY_RING: Int get() = if (isDark) 0xFF332B23.toInt() else 0xFFEFE6D8.toInt()
+    val SHEET_HANDLE: Int get() = if (isDark) 0xFF52463B.toInt() else 0xFFD5C8B8.toInt()
+    val AMOUNT_BOX_BORDER: Int get() = if (isDark) 0xFF5E472A.toInt() else 0xFFEDD9B4.toInt()
+    val CALC_OP_BG: Int get() = if (isDark) 0xFF362B20.toInt() else 0xFFF5EAD8.toInt()
+    val TOAST_BG: Int get() = if (isDark) 0xF23A2F25.toInt() else 0xEB3D3127.toInt()
+    val TOAST_BORDER: Int? get() = if (isDark) 0xFF5C4936.toInt() else null
+    val TOAST_TEXT: Int get() = 0xFFFFFDF8.toInt()
 }
 
 fun Context.dp(value: Int): Int =
@@ -737,9 +760,12 @@ fun showWarmConfirmDialog(
     }
 
     dialog.setContentView(container)
-    dialog.window?.setLayout(
-        ViewGroup.LayoutParams.MATCH_PARENT,
-        ViewGroup.LayoutParams.WRAP_CONTENT
-    )
+    dialog.window?.apply {
+        setDimAmount(if (UiColors.isDark) 0.65f else 0.45f)
+        setLayout(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+    }
     dialog.show()
 }

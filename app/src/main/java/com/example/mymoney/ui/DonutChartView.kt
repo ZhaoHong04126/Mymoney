@@ -7,7 +7,6 @@ import android.graphics.RectF
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
-import androidx.core.graphics.toColorInt
 import kotlin.math.atan2
 import kotlin.math.min
 import kotlin.math.sqrt
@@ -35,7 +34,6 @@ class DonutChartView @JvmOverloads constructor(
 
     private val emptyRingPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.STROKE
-        color = "#EFE6D8".toColorInt()
     }
 
     private val arcRect = RectF()
@@ -78,6 +76,7 @@ class DonutChartView @JvmOverloads constructor(
         )
 
         if (slices.isEmpty() || totalAmount <= 0L) {
+            emptyRingPaint.color = UiColors.DONUT_EMPTY_RING
             emptyRingPaint.strokeWidth = baseStroke
             canvas.drawCircle(centerX, centerY, ringRadius, emptyRingPaint)
             return
